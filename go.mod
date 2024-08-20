@@ -19,5 +19,3 @@ require (
 	golang.org/x/time v0.6.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
-
-retract [v1.0.0, v1.0.0]
