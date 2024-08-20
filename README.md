@@ -35,7 +35,7 @@ import (
 
 	"github.com/xanzy/go-gitlab"
 
-	"github.com/flc1125/gitlabwebhook"
+	"github.com/flc1125/go-gitlab-webhook"
 )
 
 var (
