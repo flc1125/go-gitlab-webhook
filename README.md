@@ -21,7 +21,7 @@ This is a simple webhook dispatcher for Gitlab. It listens for incoming webhooks
 ## 📦 Installation
 
 ```shell
-go get https://github.com/flc1125/go-gitlab-webhook
+go get github.com/flc1125/go-gitlab-webhook
 ```
 
 ## 💻 Usage
