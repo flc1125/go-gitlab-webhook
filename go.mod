@@ -1,4 +1,4 @@
-module github.com/flc1125/gitlabwebhook
+module github.com/flc1125/go-gitlab-webhook
 
 go 1.18
 
