@@ -33,9 +33,8 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/xanzy/go-gitlab"
-
 	"github.com/flc1125/go-gitlab-webhook"
+	"gitlab.com/gitlab-org/api/client-go"
 )
 
 var (
