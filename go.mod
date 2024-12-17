@@ -1,10 +1,9 @@
 module github.com/flc1125/go-gitlab-webhook/v2
 
 go 1.21
-
 require (
 	github.com/stretchr/testify v1.10.0
-	gitlab.com/gitlab-org/api/client-go v0.116.0
+	gitlab.com/gitlab-org/api/client-go v0.117.0
 	golang.org/x/sync v0.10.0
 )
 
