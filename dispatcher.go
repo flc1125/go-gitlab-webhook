@@ -288,7 +288,6 @@ func (d *Dispatcher) DispatchRequest(req *http.Request, opts ...DispatchRequestO
 func (d *Dispatcher) processBuildEvent(ctx context.Context, event *gitlab.BuildEvent) error {
 	eg, ctx := errgroup.WithContext(ctx)
 	for _, listener := range d.buildListeners {
-		listener := listener
 		eg.Go(func() error {
 			return listener.OnBuild(ctx, event)
 		})
@@ -299,7 +298,6 @@ func (d *Dispatcher) processBuildEvent(ctx context.Context, event *gitlab.BuildE
 func (d *Dispatcher) processCommitCommentEvent(ctx context.Context, event *gitlab.CommitCommentEvent) error {
 	eg, ctx := errgroup.WithContext(ctx)
 	for _, listener := range d.commitCommentListeners {
-		listener := listener
 		eg.Go(func() error {
 			return listener.OnCommitComment(ctx, event)
 		})
@@ -310,7 +308,6 @@ func (d *Dispatcher) processCommitCommentEvent(ctx context.Context, event *gitla
 func (d *Dispatcher) processDeploymentEvent(ctx context.Context, event *gitlab.DeploymentEvent) error {
 	eg, ctx := errgroup.WithContext(ctx)
 	for _, listener := range d.deploymentListeners {
-		listener := listener
 		eg.Go(func() error {
 			return listener.OnDeployment(ctx, event)
 		})
@@ -321,7 +318,6 @@ func (d *Dispatcher) processDeploymentEvent(ctx context.Context, event *gitlab.D
 func (d *Dispatcher) processFeatureFlagEvent(ctx context.Context, event *gitlab.FeatureFlagEvent) error {
 	eg, ctx := errgroup.WithContext(ctx)
 	for _, listener := range d.featureFlagListeners {
-		listener := listener
 		eg.Go(func() error {
 			return listener.OnFeatureFlag(ctx, event)
 		})
@@ -332,7 +328,6 @@ func (d *Dispatcher) processFeatureFlagEvent(ctx context.Context, event *gitlab.
 func (d *Dispatcher) processGroupResourceAccessTokenEvent(ctx context.Context, event *gitlab.GroupResourceAccessTokenEvent) error { //nolint:lll
 	eg, ctx := errgroup.WithContext(ctx)
 	for _, listener := range d.groupResourceAccessTokenListeners {
-		listener := listener
 		eg.Go(func() error {
 			return listener.OnGroupResourceAccessToken(ctx, event)
 		})
@@ -343,7 +338,6 @@ func (d *Dispatcher) processGroupResourceAccessTokenEvent(ctx context.Context, e
 func (d *Dispatcher) processIssueCommentEvent(ctx context.Context, event *gitlab.IssueCommentEvent) error {
 	eg, ctx := errgroup.WithContext(ctx)
 	for _, listener := range d.issueCommentListeners {
-		listener := listener
 		eg.Go(func() error {
 			return listener.OnIssueComment(ctx, event)
 		})
@@ -354,7 +348,6 @@ func (d *Dispatcher) processIssueCommentEvent(ctx context.Context, event *gitlab
 func (d *Dispatcher) processIssueEvent(ctx context.Context, event *gitlab.IssueEvent) error {
 	eg, ctx := errgroup.WithContext(ctx)
 	for _, listener := range d.issueListeners {
-		listener := listener
 		eg.Go(func() error {
 			return listener.OnIssue(ctx, event)
 		})
@@ -365,7 +358,6 @@ func (d *Dispatcher) processIssueEvent(ctx context.Context, event *gitlab.IssueE
 func (d *Dispatcher) processJobEvent(ctx context.Context, event *gitlab.JobEvent) error {
 	eg, ctx := errgroup.WithContext(ctx)
 	for _, listener := range d.jobListeners {
-		listener := listener
 		eg.Go(func() error {
 			return listener.OnJob(ctx, event)
 		})
@@ -376,7 +368,6 @@ func (d *Dispatcher) processJobEvent(ctx context.Context, event *gitlab.JobEvent
 func (d *Dispatcher) processMemberEvent(ctx context.Context, event *gitlab.MemberEvent) error {
 	eg, ctx := errgroup.WithContext(ctx)
 	for _, listener := range d.memberListeners {
-		listener := listener
 		eg.Go(func() error {
 			return listener.OnMember(ctx, event)
 		})
@@ -387,7 +378,6 @@ func (d *Dispatcher) processMemberEvent(ctx context.Context, event *gitlab.Membe
 func (d *Dispatcher) processMergeCommentEvent(ctx context.Context, event *gitlab.MergeCommentEvent) error {
 	eg, ctx := errgroup.WithContext(ctx)
 	for _, listener := range d.mergeCommentListeners {
-		listener := listener
 		eg.Go(func() error {
 			return listener.OnMergeComment(ctx, event)
 		})
@@ -398,7 +388,6 @@ func (d *Dispatcher) processMergeCommentEvent(ctx context.Context, event *gitlab
 func (d *Dispatcher) processMergeEvent(ctx context.Context, event *gitlab.MergeEvent) error {
 	eg, ctx := errgroup.WithContext(ctx)
 	for _, listener := range d.mergeListeners {
-		listener := listener
 		eg.Go(func() error {
 			return listener.OnMerge(ctx, event)
 		})
@@ -409,7 +398,6 @@ func (d *Dispatcher) processMergeEvent(ctx context.Context, event *gitlab.MergeE
 func (d *Dispatcher) processPipelineEvent(ctx context.Context, event *gitlab.PipelineEvent) error {
 	eg, ctx := errgroup.WithContext(ctx)
 	for _, listener := range d.pipelineListeners {
-		listener := listener
 		eg.Go(func() error {
 			return listener.OnPipeline(ctx, event)
 		})
@@ -420,7 +408,6 @@ func (d *Dispatcher) processPipelineEvent(ctx context.Context, event *gitlab.Pip
 func (d *Dispatcher) processProjectResourceAccessTokenEvent(ctx context.Context, event *gitlab.ProjectResourceAccessTokenEvent) error { //nolint:lll
 	eg, ctx := errgroup.WithContext(ctx)
 	for _, listener := range d.projectResourceAccessTokenListeners {
-		listener := listener
 		eg.Go(func() error {
 			return listener.OnProjectResourceAccessToken(ctx, event)
 		})
@@ -431,7 +418,6 @@ func (d *Dispatcher) processProjectResourceAccessTokenEvent(ctx context.Context,
 func (d *Dispatcher) processPushEvent(ctx context.Context, event *gitlab.PushEvent) error {
 	eg, ctx := errgroup.WithContext(ctx)
 	for _, listener := range d.pushListeners {
-		listener := listener
 		eg.Go(func() error {
 			return listener.OnPush(ctx, event)
 		})
@@ -442,7 +428,6 @@ func (d *Dispatcher) processPushEvent(ctx context.Context, event *gitlab.PushEve
 func (d *Dispatcher) processReleaseEvent(ctx context.Context, event *gitlab.ReleaseEvent) error {
 	eg, ctx := errgroup.WithContext(ctx)
 	for _, listener := range d.releaseListeners {
-		listener := listener
 		eg.Go(func() error {
 			return listener.OnRelease(ctx, event)
 		})
@@ -453,7 +438,6 @@ func (d *Dispatcher) processReleaseEvent(ctx context.Context, event *gitlab.Rele
 func (d *Dispatcher) processSnippetCommentEvent(ctx context.Context, event *gitlab.SnippetCommentEvent) error {
 	eg, ctx := errgroup.WithContext(ctx)
 	for _, listener := range d.snippetCommentListeners {
-		listener := listener
 		eg.Go(func() error {
 			return listener.OnSnippetComment(ctx, event)
 		})
@@ -464,7 +448,6 @@ func (d *Dispatcher) processSnippetCommentEvent(ctx context.Context, event *gitl
 func (d *Dispatcher) processSubGroupEvent(ctx context.Context, event *gitlab.SubGroupEvent) error {
 	eg, ctx := errgroup.WithContext(ctx)
 	for _, listener := range d.subGroupListeners {
-		listener := listener
 		eg.Go(func() error {
 			return listener.OnSubGroup(ctx, event)
 		})
@@ -475,7 +458,6 @@ func (d *Dispatcher) processSubGroupEvent(ctx context.Context, event *gitlab.Sub
 func (d *Dispatcher) processTagEvent(ctx context.Context, event *gitlab.TagEvent) error {
 	eg, ctx := errgroup.WithContext(ctx)
 	for _, listener := range d.tagListeners {
-		listener := listener
 		eg.Go(func() error {
 			return listener.OnTag(ctx, event)
 		})
@@ -486,7 +468,6 @@ func (d *Dispatcher) processTagEvent(ctx context.Context, event *gitlab.TagEvent
 func (d *Dispatcher) processWikiPageEvent(ctx context.Context, event *gitlab.WikiPageEvent) error {
 	eg, ctx := errgroup.WithContext(ctx)
 	for _, listener := range d.wikiPageListeners {
-		listener := listener
 		eg.Go(func() error {
 			return listener.OnWikiPage(ctx, event)
 		})
