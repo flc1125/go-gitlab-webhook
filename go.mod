@@ -4,7 +4,7 @@ go 1.22.10
 
 require (
 	github.com/stretchr/testify v1.10.0
-	gitlab.com/gitlab-org/api/client-go v0.122.0
+	gitlab.com/gitlab-org/api/client-go v0.123.0
 	golang.org/x/sync v0.11.0
 )
 
