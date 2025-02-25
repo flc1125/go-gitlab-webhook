@@ -1,6 +1,6 @@
 module github.com/flc1125/go-gitlab-webhook/v2
 
-go 1.22.10
+go 1.23
 
 require (
 	github.com/stretchr/testify v1.10.0
