@@ -78,7 +78,7 @@ func TestDispatcher_Dispatch(t *testing.T) {
 
 			resp, err := http.DefaultClient.Do(req)
 			assert.NoError(t, err)
-			defer resp.Body.Close()
+			defer resp.Body.Close() //nolint:errcheck
 
 			assert.Equal(t, http.StatusOK, resp.StatusCode)
 
