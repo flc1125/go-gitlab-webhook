@@ -417,7 +417,6 @@ func process[L any, E any](listeners []L, event E, handler func(L, E) error) err
 
 	errCh := make(chan error, len(listeners))
 	for _, listener := range listeners {
-		listener := listener
 		go func() {
 			defer wg.Done()
 			if err := handler(listener, event); err != nil {
