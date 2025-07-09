@@ -5,9 +5,9 @@ import (
 	"errors"
 	"io"
 	"net/http"
+	"sync"
 
 	"github.com/xanzy/go-gitlab"
-	"golang.org/x/sync/errgroup"
 )
 
 var ErrUnsupportedEvent = errors.New("gitlab-webhook: unsupported event type")
@@ -286,210 +286,152 @@ func (d *Dispatcher) DispatchRequest(req *http.Request, opts ...DispatchRequestO
 }
 
 func (d *Dispatcher) processBuildEvent(ctx context.Context, event *gitlab.BuildEvent) error {
-	eg, ctx := errgroup.WithContext(ctx)
-	for _, listener := range d.buildListeners {
-		listener := listener
-		eg.Go(func() error {
-			return listener.OnBuild(ctx, event)
-		})
-	}
-	return eg.Wait()
+	return process(d.buildListeners, event, func(listener BuildListener, event *gitlab.BuildEvent) error {
+		return listener.OnBuild(ctx, event)
+	})
 }
 
 func (d *Dispatcher) processCommitCommentEvent(ctx context.Context, event *gitlab.CommitCommentEvent) error {
-	eg, ctx := errgroup.WithContext(ctx)
-	for _, listener := range d.commitCommentListeners {
-		listener := listener
-		eg.Go(func() error {
-			return listener.OnCommitComment(ctx, event)
-		})
-	}
-	return eg.Wait()
+	return process(d.commitCommentListeners, event, func(listener CommitCommentListener, event *gitlab.CommitCommentEvent) error {
+		return listener.OnCommitComment(ctx, event)
+	})
 }
 
 func (d *Dispatcher) processDeploymentEvent(ctx context.Context, event *gitlab.DeploymentEvent) error {
-	eg, ctx := errgroup.WithContext(ctx)
-	for _, listener := range d.deploymentListeners {
-		listener := listener
-		eg.Go(func() error {
-			return listener.OnDeployment(ctx, event)
-		})
-	}
-	return eg.Wait()
+	return process(d.deploymentListeners, event, func(listener DeploymentListener, event *gitlab.DeploymentEvent) error {
+		return listener.OnDeployment(ctx, event)
+	})
 }
 
 func (d *Dispatcher) processFeatureFlagEvent(ctx context.Context, event *gitlab.FeatureFlagEvent) error {
-	eg, ctx := errgroup.WithContext(ctx)
-	for _, listener := range d.featureFlagListeners {
-		listener := listener
-		eg.Go(func() error {
-			return listener.OnFeatureFlag(ctx, event)
-		})
-	}
-	return eg.Wait()
+	return process(d.featureFlagListeners, event, func(listener FeatureFlagListener, event *gitlab.FeatureFlagEvent) error {
+		return listener.OnFeatureFlag(ctx, event)
+	})
 }
 
 func (d *Dispatcher) processGroupResourceAccessTokenEvent(ctx context.Context, event *gitlab.GroupResourceAccessTokenEvent) error { //nolint:lll
-	eg, ctx := errgroup.WithContext(ctx)
-	for _, listener := range d.groupResourceAccessTokenListeners {
-		listener := listener
-		eg.Go(func() error {
-			return listener.OnGroupResourceAccessToken(ctx, event)
-		})
-	}
-	return eg.Wait()
+	return process(d.groupResourceAccessTokenListeners, event, func(listener GroupResourceAccessTokenListener, event *gitlab.GroupResourceAccessTokenEvent) error {
+		return listener.OnGroupResourceAccessToken(ctx, event)
+	})
 }
 
 func (d *Dispatcher) processIssueCommentEvent(ctx context.Context, event *gitlab.IssueCommentEvent) error {
-	eg, ctx := errgroup.WithContext(ctx)
-	for _, listener := range d.issueCommentListeners {
-		listener := listener
-		eg.Go(func() error {
-			return listener.OnIssueComment(ctx, event)
-		})
-	}
-	return eg.Wait()
+	return process(d.issueCommentListeners, event, func(listener IssueCommentListener, event *gitlab.IssueCommentEvent) error {
+		return listener.OnIssueComment(ctx, event)
+	})
 }
 
 func (d *Dispatcher) processIssueEvent(ctx context.Context, event *gitlab.IssueEvent) error {
-	eg, ctx := errgroup.WithContext(ctx)
-	for _, listener := range d.issueListeners {
-		listener := listener
-		eg.Go(func() error {
-			return listener.OnIssue(ctx, event)
-		})
-	}
-	return eg.Wait()
+	return process(d.issueListeners, event, func(listener IssueListener, event *gitlab.IssueEvent) error {
+		return listener.OnIssue(ctx, event)
+	})
 }
 
 func (d *Dispatcher) processJobEvent(ctx context.Context, event *gitlab.JobEvent) error {
-	eg, ctx := errgroup.WithContext(ctx)
-	for _, listener := range d.jobListeners {
-		listener := listener
-		eg.Go(func() error {
-			return listener.OnJob(ctx, event)
-		})
-	}
-	return eg.Wait()
+	return process(d.jobListeners, event, func(listener JobListener, event *gitlab.JobEvent) error {
+		return listener.OnJob(ctx, event)
+	})
 }
 
 func (d *Dispatcher) processMemberEvent(ctx context.Context, event *gitlab.MemberEvent) error {
-	eg, ctx := errgroup.WithContext(ctx)
-	for _, listener := range d.memberListeners {
-		listener := listener
-		eg.Go(func() error {
-			return listener.OnMember(ctx, event)
-		})
-	}
-	return eg.Wait()
+	return process(d.memberListeners, event, func(listener MemberListener, event *gitlab.MemberEvent) error {
+		return listener.OnMember(ctx, event)
+	})
 }
 
 func (d *Dispatcher) processMergeCommentEvent(ctx context.Context, event *gitlab.MergeCommentEvent) error {
-	eg, ctx := errgroup.WithContext(ctx)
-	for _, listener := range d.mergeCommentListeners {
-		listener := listener
-		eg.Go(func() error {
-			return listener.OnMergeComment(ctx, event)
-		})
-	}
-	return eg.Wait()
+	return process(d.mergeCommentListeners, event, func(listener MergeCommentListener, event *gitlab.MergeCommentEvent) error {
+		return listener.OnMergeComment(ctx, event)
+	})
 }
 
 func (d *Dispatcher) processMergeEvent(ctx context.Context, event *gitlab.MergeEvent) error {
-	eg, ctx := errgroup.WithContext(ctx)
-	for _, listener := range d.mergeListeners {
-		listener := listener
-		eg.Go(func() error {
-			return listener.OnMerge(ctx, event)
-		})
-	}
-	return eg.Wait()
+	return process(d.mergeListeners, event, func(listener MergeListener, event *gitlab.MergeEvent) error {
+		return listener.OnMerge(ctx, event)
+	})
 }
 
 func (d *Dispatcher) processPipelineEvent(ctx context.Context, event *gitlab.PipelineEvent) error {
-	eg, ctx := errgroup.WithContext(ctx)
-	for _, listener := range d.pipelineListeners {
-		listener := listener
-		eg.Go(func() error {
-			return listener.OnPipeline(ctx, event)
-		})
-	}
-	return eg.Wait()
+	return process(d.pipelineListeners, event, func(listener PipelineListener, event *gitlab.PipelineEvent) error {
+		return listener.OnPipeline(ctx, event)
+	})
 }
 
 func (d *Dispatcher) processProjectResourceAccessTokenEvent(ctx context.Context, event *gitlab.ProjectResourceAccessTokenEvent) error { //nolint:lll
-	eg, ctx := errgroup.WithContext(ctx)
-	for _, listener := range d.projectResourceAccessTokenListeners {
-		listener := listener
-		eg.Go(func() error {
-			return listener.OnProjectResourceAccessToken(ctx, event)
-		})
-	}
-	return eg.Wait()
+	return process(d.projectResourceAccessTokenListeners, event, func(listener ProjectResourceAccessTokenListener, event *gitlab.ProjectResourceAccessTokenEvent) error {
+		return listener.OnProjectResourceAccessToken(ctx, event)
+	})
 }
 
 func (d *Dispatcher) processPushEvent(ctx context.Context, event *gitlab.PushEvent) error {
-	eg, ctx := errgroup.WithContext(ctx)
-	for _, listener := range d.pushListeners {
-		listener := listener
-		eg.Go(func() error {
-			return listener.OnPush(ctx, event)
-		})
-	}
-	return eg.Wait()
+	return process(d.pushListeners, event, func(listener PushListener, event *gitlab.PushEvent) error {
+		return listener.OnPush(ctx, event)
+	})
 }
 
 func (d *Dispatcher) processReleaseEvent(ctx context.Context, event *gitlab.ReleaseEvent) error {
-	eg, ctx := errgroup.WithContext(ctx)
-	for _, listener := range d.releaseListeners {
-		listener := listener
-		eg.Go(func() error {
-			return listener.OnRelease(ctx, event)
-		})
-	}
-	return eg.Wait()
+	return process(d.releaseListeners, event, func(listener ReleaseListener, event *gitlab.ReleaseEvent) error {
+		return listener.OnRelease(ctx, event)
+	})
 }
 
 func (d *Dispatcher) processSnippetCommentEvent(ctx context.Context, event *gitlab.SnippetCommentEvent) error {
-	eg, ctx := errgroup.WithContext(ctx)
-	for _, listener := range d.snippetCommentListeners {
-		listener := listener
-		eg.Go(func() error {
-			return listener.OnSnippetComment(ctx, event)
-		})
-	}
-	return eg.Wait()
+	return process(d.snippetCommentListeners, event, func(listener SnippetCommentListener, event *gitlab.SnippetCommentEvent) error {
+		return listener.OnSnippetComment(ctx, event)
+	})
 }
 
 func (d *Dispatcher) processSubGroupEvent(ctx context.Context, event *gitlab.SubGroupEvent) error {
-	eg, ctx := errgroup.WithContext(ctx)
-	for _, listener := range d.subGroupListeners {
-		listener := listener
-		eg.Go(func() error {
-			return listener.OnSubGroup(ctx, event)
-		})
-	}
-	return eg.Wait()
+	return process(d.subGroupListeners, event, func(listener SubGroupListener, event *gitlab.SubGroupEvent) error {
+		return listener.OnSubGroup(ctx, event)
+	})
 }
 
 func (d *Dispatcher) processTagEvent(ctx context.Context, event *gitlab.TagEvent) error {
-	eg, ctx := errgroup.WithContext(ctx)
-	for _, listener := range d.tagListeners {
-		listener := listener
-		eg.Go(func() error {
-			return listener.OnTag(ctx, event)
-		})
-	}
-	return eg.Wait()
+	return process(d.tagListeners, event, func(listener TagListener, event *gitlab.TagEvent) error {
+		return listener.OnTag(ctx, event)
+	})
 }
 
 func (d *Dispatcher) processWikiPageEvent(ctx context.Context, event *gitlab.WikiPageEvent) error {
-	eg, ctx := errgroup.WithContext(ctx)
-	for _, listener := range d.wikiPageListeners {
-		listener := listener
-		eg.Go(func() error {
-			return listener.OnWikiPage(ctx, event)
-		})
+	return process(d.wikiPageListeners, event, func(listener WikiPageListener, event *gitlab.WikiPageEvent) error {
+		return listener.OnWikiPage(ctx, event)
+	})
+}
+
+var waitGroupPool = sync.Pool{
+	New: func() any {
+		return &sync.WaitGroup{}
+	},
+}
+
+func process[L any, E any](listeners []L, event E, handler func(L, E) error) error {
+	if len(listeners) == 0 {
+		return nil
 	}
-	return eg.Wait()
+	wg := waitGroupPool.Get().(*sync.WaitGroup)
+	wg.Add(len(listeners))
+	defer func() {
+		waitGroupPool.Put(wg)
+	}()
+
+	errCh := make(chan error, len(listeners))
+	for _, listener := range listeners {
+		go func() {
+			defer wg.Done()
+			if err := handler(listener, event); err != nil {
+				errCh <- err
+			}
+		}()
+	}
+	wg.Wait()
+
+	close(errCh)
+	var err error
+	for e := range errCh {
+		if e != nil {
+			err = errors.Join(err, e)
+		}
+	}
+	return err
 }

@@ -2,10 +2,10 @@ name: Go Test
 on:
   push:
     branches:
-      - master
+      - v1.x
   pull_request:
     branches:
-      - master
+      - v1.x
 env:
   GOPROXY: "https://proxy.golang.org"
 
@@ -14,7 +14,7 @@ jobs:
     name: "go test"
     strategy:
       matrix:
-        go-version: [ 1.18.x, 1.19.x, 1.20.x, 1.21.x, 1.22.x, 1.23.x ]
+        go-version: [ 1.23.x, 1.24.x ]
         platform: [ ubuntu-latest, windows-latest, macos-latest ]
     runs-on: ${{ matrix.platform }}
 
