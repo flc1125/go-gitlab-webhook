@@ -20,8 +20,8 @@ github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZb
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/stretchr/testify v1.11.1 h1:7s2iGBzp5EwR7/aIZr8ao5+dra3wiQyKjjFuvgVKu7U=
 github.com/stretchr/testify v1.11.1/go.mod h1:wZwfW3scLgRK+23gO65QZefKpKQRnfz6sD981Nm4B6U=
-gitlab.com/gitlab-org/api/client-go v0.143.0 h1:/WXq1qvDi80bziVRmbQeJvFuILdUk4KXGcBNeHB6er8=
-gitlab.com/gitlab-org/api/client-go v0.143.0/go.mod h1:t02B5oJWYEzalBlYIh+PmEJm2H4LPC/VFM1xks5qtG8=
+gitlab.com/gitlab-org/api/client-go v0.143.1 h1:5HyFrXtBZ0WbWLl6Ighrv8wxZ/NWz/KimZiXw6gCT9s=
+gitlab.com/gitlab-org/api/client-go v0.143.1/go.mod h1:wvte1ie2U9x25hadhyuCkYug/uxsWMWOTcrgm+f7Big=
 golang.org/x/oauth2 v0.31.0 h1:8Fq0yVZLh4j4YA47vHKFTa9Ew5XIrCP8LC6UeNZnLxo=
 golang.org/x/oauth2 v0.31.0/go.mod h1:lzm5WQJQwKZ3nwavOZ3IS5Aulzxi68dUSgRHujetwEA=
 golang.org/x/sync v0.17.0 h1:l60nONMj9l5drqw6jlhIELNv9I0A4OFgRsG9k2oT9Ug=
