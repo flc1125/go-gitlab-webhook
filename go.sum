@@ -21,8 +21,8 @@ github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZb
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/stretchr/testify v1.11.1 h1:7s2iGBzp5EwR7/aIZr8ao5+dra3wiQyKjjFuvgVKu7U=
 github.com/stretchr/testify v1.11.1/go.mod h1:wZwfW3scLgRK+23gO65QZefKpKQRnfz6sD981Nm4B6U=
-gitlab.com/gitlab-org/api/client-go v0.152.0 h1:G7aHUkWgo6jG8vRgITn7/fPTSHpSgXGGlJine2KzE2A=
-gitlab.com/gitlab-org/api/client-go v0.152.0/go.mod h1:CQVoxjEswJZeXft4Mi+H+OF1MVrpNVF6m4xvlPTQ2J4=
+gitlab.com/gitlab-org/api/client-go v0.154.0 h1:RnAozG7ToCunYizz0v+vJEDj/id1dt820vV4mYOrLFw=
+gitlab.com/gitlab-org/api/client-go v0.154.0/go.mod h1:CQVoxjEswJZeXft4Mi+H+OF1MVrpNVF6m4xvlPTQ2J4=
 golang.org/x/exp v0.0.0-20251002181428-27f1f14c8bb9 h1:TQwNpfvNkxAVlItJf6Cr5JTsVZoC/Sj7K3OZv2Pc14A=
 golang.org/x/exp v0.0.0-20251002181428-27f1f14c8bb9/go.mod h1:TwQYMMnGpvZyc+JpB/UAuTNIsVJifOlSkrZkhcvpVUk=
 golang.org/x/oauth2 v0.32.0 h1:jsCblLleRMDrxMN29H3z/k1KliIvpLgCkE6R8FXXNgY=
