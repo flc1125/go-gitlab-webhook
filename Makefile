@@ -1,16 +1,17 @@
-.PHONY: init
-init:
-	go install mvdan.cc/gofumpt@latest
-	go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@latest
+GO = go
+GOLANGCI_LINT = $(GO) tool golangci-lint
+
+.PHONY: go-mod-tidy
+go-mod-tidy:
+	@echo "go mod tidy in all modules" && \
+		$(GO) mod tidy -compat=1.24.0
 
 .PHONY: lint
-lint:
-	golangci-lint run
-	@echo "✅ Linting completed"
-
-.PHONY: fix
-fix:
-	golangci-lint run --fix
+lint: go-mod-tidy
+	@echo "Starting linting..." && \
+		$(GOLANGCI_LINT) run --concurrency=4 --allow-serial-runners $(ARGS)
+lint-fix: ARGS=--fix
+lint-fix: lint
 	@echo "✅ Lint fixing completed"
 
 .PHONY: test
@@ -18,21 +19,12 @@ test:
 	go test ./... -race
 	@echo "✅ Testing completed"
 
-.PHONY: fmt
-fmt:
-	gofmt -w -e "vendor" .
-	@echo "✅ Formatting completed"
-
-.PHONY: fumpt
-fumpt:
-	gofumpt -w -e "vendor" .
-	@echo "✅ Formatting completed"
-
-.PHONY: nilaway-install
-nilaway-install:
-	go install go.uber.org/nilaway/cmd/nilaway@latest
-
-.PHONY: nilaway
-nilaway:
-	nilaway ./...
-	@echo "✅ Nilaway completed"
+.PHONY: check-clean-work
+check-clean-work:
+	@if ! git diff --quiet; then \
+	  echo; \
+	  echo 'Working tree is not clean, did you forget to run "git stash" or "git commit"?'; \
+	  echo; \
+	  git status; \
+	  exit 1; \
+	fi

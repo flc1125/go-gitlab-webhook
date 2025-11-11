@@ -2,6 +2,8 @@ module github.com/flc1125/go-gitlab-webhook/v2
 
 go 1.24.0
 
+tool github.com/golangci/golangci-lint/v2/cmd/golangci-lint
+
 require (
 	github.com/stretchr/testify v1.11.1
 	gitlab.com/gitlab-org/api/client-go v0.159.0
