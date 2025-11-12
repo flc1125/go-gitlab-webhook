@@ -5,9 +5,9 @@ import (
 	"errors"
 	"io"
 	"net/http"
+	"sync"
 
 	gitlab "gitlab.com/gitlab-org/api/client-go"
-	"golang.org/x/sync/errgroup"
 )
 
 var ErrUnsupportedEvent = errors.New("gitlab-webhook: unsupported event type")
@@ -362,11 +362,28 @@ func (d *Dispatcher) processWikiPageEvent(ctx context.Context, event *gitlab.Wik
 }
 
 func processEvent[E any, L any](ctx context.Context, listeners []L, handler func(L, context.Context, E) error, event E) error {
-	eg, ctx := errgroup.WithContext(ctx)
-	for _, listener := range listeners {
-		eg.Go(func() error {
-			return handler(listener, ctx, event)
-		})
+	if len(listeners) == 0 {
+		return nil
 	}
-	return eg.Wait()
+
+	wg := sync.WaitGroup{}
+	wg.Add(len(listeners))
+
+	errCh := make(chan error, len(listeners))
+	for _, listener := range listeners {
+		go func() {
+			defer wg.Done()
+			if err := handler(listener, ctx, event); err != nil {
+				errCh <- err
+			}
+		}()
+	}
+	wg.Wait()
+
+	close(errCh)
+	var err error
+	for e := range errCh {
+		err = errors.Join(err, e)
+	}
+	return err
 }
