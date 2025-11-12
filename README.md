@@ -17,6 +17,7 @@ This is a simple webhook dispatcher for Gitlab. It listens for incoming webhooks
 - 🔄 A single listener can implement multiple different webhook functions
 - ⚡ Support asynchronous and efficient processing
 - 🚀 Multiple dispatch methods
+- 🔐 Token validation support for secure webhook handling
 
 ## 📦 Installation
 
@@ -87,6 +88,7 @@ func main() {
 
 	http.Handle("/webhook", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if err := dispatcher.DispatchRequest(r,
+			gitlabwebhook.DispatchRequestWithToken("your-secret-token"), // validate token, if needed
 			gitlabwebhook.DispatchRequestWithContext(context.Background()), // custom context
 		); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)

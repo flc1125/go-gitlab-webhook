@@ -229,6 +229,96 @@ func (t *testListener) OnWikiPage(ctx context.Context, event *gitlab.WikiPageEve
 	return nil
 }
 
+func TestDispatcher_DispatchRequestWithToken(t *testing.T) {
+	simpleListener := &simpleTestListener{}
+	dispatcher := NewDispatcher(
+		RegisterListeners(simpleListener),
+	)
+
+	validToken := "test-secret-token"
+	invalidToken := "wrong-token"
+
+	tests := []struct {
+		name           string
+		token          string
+		headerToken    string
+		expectedError  error
+		shouldDispatch bool
+	}{
+		{
+			name:           "valid token should dispatch successfully",
+			token:          validToken,
+			headerToken:    validToken,
+			expectedError:  nil,
+			shouldDispatch: true,
+		},
+		{
+			name:           "invalid token should return ErrInvalidToken",
+			token:          validToken,
+			headerToken:    invalidToken,
+			expectedError:  ErrInvalidToken,
+			shouldDispatch: false,
+		},
+		{
+			name:           "missing token header should return ErrInvalidToken",
+			token:          validToken,
+			headerToken:    "",
+			expectedError:  ErrInvalidToken,
+			shouldDispatch: false,
+		},
+		{
+			name:           "no token provided should dispatch successfully",
+			token:          "",
+			headerToken:    "",
+			expectedError:  nil,
+			shouldDispatch: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			req, err := http.NewRequest(http.MethodPost, "/webhook", bytes.NewReader(loadFixture("testdata/webhooks/push.json")))
+			assert.NoError(t, err)
+			req.Header.Set("Content-Type", "application/json")
+			req.Header.Set("X-Gitlab-Event", string(gitlab.EventTypePush))
+
+			if tt.headerToken != "" {
+				req.Header.Set("X-Gitlab-Token", tt.headerToken)
+			}
+
+			var opts []DispatchRequestOption
+			if tt.token != "" {
+				opts = append(opts, DispatchRequestWithToken(tt.token))
+			}
+
+			// Reset listener call count
+			simpleListener.called = false
+
+			err = dispatcher.DispatchRequest(req, opts...)
+
+			if tt.expectedError != nil {
+				assert.Error(t, err)
+				assert.ErrorIs(t, err, tt.expectedError)
+				assert.False(t, simpleListener.called, "Listener should not be called when token validation fails")
+			} else {
+				assert.NoError(t, err)
+				assert.True(t, simpleListener.called, "Listener should be called when token validation passes")
+			}
+		})
+	}
+}
+
+type simpleTestListener struct {
+	called bool
+}
+
+var _ PushListener = (*simpleTestListener)(nil)
+
+func (s *simpleTestListener) OnPush(ctx context.Context, event *gitlab.PushEvent) error {
+	s.called = true
+	return nil
+}
+
 func loadFixture(filePath string) []byte {
 	content, err := os.ReadFile(filePath)
 	if err != nil {
