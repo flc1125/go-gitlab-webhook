@@ -286,190 +286,86 @@ func (d *Dispatcher) DispatchRequest(req *http.Request, opts ...DispatchRequestO
 }
 
 func (d *Dispatcher) processBuildEvent(ctx context.Context, event *gitlab.BuildEvent) error {
-	eg, ctx := errgroup.WithContext(ctx)
-	for _, listener := range d.buildListeners {
-		eg.Go(func() error {
-			return listener.OnBuild(ctx, event)
-		})
-	}
-	return eg.Wait()
+	return processEvent(ctx, d.buildListeners, BuildListener.OnBuild, event)
 }
 
 func (d *Dispatcher) processCommitCommentEvent(ctx context.Context, event *gitlab.CommitCommentEvent) error {
-	eg, ctx := errgroup.WithContext(ctx)
-	for _, listener := range d.commitCommentListeners {
-		eg.Go(func() error {
-			return listener.OnCommitComment(ctx, event)
-		})
-	}
-	return eg.Wait()
+	return processEvent(ctx, d.commitCommentListeners, CommitCommentListener.OnCommitComment, event)
 }
 
 func (d *Dispatcher) processDeploymentEvent(ctx context.Context, event *gitlab.DeploymentEvent) error {
-	eg, ctx := errgroup.WithContext(ctx)
-	for _, listener := range d.deploymentListeners {
-		eg.Go(func() error {
-			return listener.OnDeployment(ctx, event)
-		})
-	}
-	return eg.Wait()
+	return processEvent(ctx, d.deploymentListeners, DeploymentListener.OnDeployment, event)
 }
 
 func (d *Dispatcher) processFeatureFlagEvent(ctx context.Context, event *gitlab.FeatureFlagEvent) error {
-	eg, ctx := errgroup.WithContext(ctx)
-	for _, listener := range d.featureFlagListeners {
-		eg.Go(func() error {
-			return listener.OnFeatureFlag(ctx, event)
-		})
-	}
-	return eg.Wait()
+	return processEvent(ctx, d.featureFlagListeners, FeatureFlagListener.OnFeatureFlag, event)
 }
 
 func (d *Dispatcher) processGroupResourceAccessTokenEvent(ctx context.Context, event *gitlab.GroupResourceAccessTokenEvent) error { //nolint:lll
-	eg, ctx := errgroup.WithContext(ctx)
-	for _, listener := range d.groupResourceAccessTokenListeners {
-		eg.Go(func() error {
-			return listener.OnGroupResourceAccessToken(ctx, event)
-		})
-	}
-	return eg.Wait()
+	return processEvent(ctx, d.groupResourceAccessTokenListeners, GroupResourceAccessTokenListener.OnGroupResourceAccessToken, event)
 }
 
 func (d *Dispatcher) processIssueCommentEvent(ctx context.Context, event *gitlab.IssueCommentEvent) error {
-	eg, ctx := errgroup.WithContext(ctx)
-	for _, listener := range d.issueCommentListeners {
-		eg.Go(func() error {
-			return listener.OnIssueComment(ctx, event)
-		})
-	}
-	return eg.Wait()
+	return processEvent(ctx, d.issueCommentListeners, IssueCommentListener.OnIssueComment, event)
 }
 
 func (d *Dispatcher) processIssueEvent(ctx context.Context, event *gitlab.IssueEvent) error {
-	eg, ctx := errgroup.WithContext(ctx)
-	for _, listener := range d.issueListeners {
-		eg.Go(func() error {
-			return listener.OnIssue(ctx, event)
-		})
-	}
-	return eg.Wait()
+	return processEvent(ctx, d.issueListeners, IssueListener.OnIssue, event)
 }
 
 func (d *Dispatcher) processJobEvent(ctx context.Context, event *gitlab.JobEvent) error {
-	eg, ctx := errgroup.WithContext(ctx)
-	for _, listener := range d.jobListeners {
-		eg.Go(func() error {
-			return listener.OnJob(ctx, event)
-		})
-	}
-	return eg.Wait()
+	return processEvent(ctx, d.jobListeners, JobListener.OnJob, event)
 }
 
 func (d *Dispatcher) processMemberEvent(ctx context.Context, event *gitlab.MemberEvent) error {
-	eg, ctx := errgroup.WithContext(ctx)
-	for _, listener := range d.memberListeners {
-		eg.Go(func() error {
-			return listener.OnMember(ctx, event)
-		})
-	}
-	return eg.Wait()
+	return processEvent(ctx, d.memberListeners, MemberListener.OnMember, event)
 }
 
 func (d *Dispatcher) processMergeCommentEvent(ctx context.Context, event *gitlab.MergeCommentEvent) error {
-	eg, ctx := errgroup.WithContext(ctx)
-	for _, listener := range d.mergeCommentListeners {
-		eg.Go(func() error {
-			return listener.OnMergeComment(ctx, event)
-		})
-	}
-	return eg.Wait()
+	return processEvent(ctx, d.mergeCommentListeners, MergeCommentListener.OnMergeComment, event)
 }
 
 func (d *Dispatcher) processMergeEvent(ctx context.Context, event *gitlab.MergeEvent) error {
-	eg, ctx := errgroup.WithContext(ctx)
-	for _, listener := range d.mergeListeners {
-		eg.Go(func() error {
-			return listener.OnMerge(ctx, event)
-		})
-	}
-	return eg.Wait()
+	return processEvent(ctx, d.mergeListeners, MergeListener.OnMerge, event)
 }
 
 func (d *Dispatcher) processPipelineEvent(ctx context.Context, event *gitlab.PipelineEvent) error {
-	eg, ctx := errgroup.WithContext(ctx)
-	for _, listener := range d.pipelineListeners {
-		eg.Go(func() error {
-			return listener.OnPipeline(ctx, event)
-		})
-	}
-	return eg.Wait()
+	return processEvent(ctx, d.pipelineListeners, PipelineListener.OnPipeline, event)
 }
 
 func (d *Dispatcher) processProjectResourceAccessTokenEvent(ctx context.Context, event *gitlab.ProjectResourceAccessTokenEvent) error { //nolint:lll
-	eg, ctx := errgroup.WithContext(ctx)
-	for _, listener := range d.projectResourceAccessTokenListeners {
-		eg.Go(func() error {
-			return listener.OnProjectResourceAccessToken(ctx, event)
-		})
-	}
-	return eg.Wait()
+	return processEvent(ctx, d.projectResourceAccessTokenListeners, ProjectResourceAccessTokenListener.OnProjectResourceAccessToken, event)
 }
 
 func (d *Dispatcher) processPushEvent(ctx context.Context, event *gitlab.PushEvent) error {
-	eg, ctx := errgroup.WithContext(ctx)
-	for _, listener := range d.pushListeners {
-		eg.Go(func() error {
-			return listener.OnPush(ctx, event)
-		})
-	}
-	return eg.Wait()
+	return processEvent(ctx, d.pushListeners, PushListener.OnPush, event)
 }
 
 func (d *Dispatcher) processReleaseEvent(ctx context.Context, event *gitlab.ReleaseEvent) error {
-	eg, ctx := errgroup.WithContext(ctx)
-	for _, listener := range d.releaseListeners {
-		eg.Go(func() error {
-			return listener.OnRelease(ctx, event)
-		})
-	}
-	return eg.Wait()
+	return processEvent(ctx, d.releaseListeners, ReleaseListener.OnRelease, event)
 }
 
 func (d *Dispatcher) processSnippetCommentEvent(ctx context.Context, event *gitlab.SnippetCommentEvent) error {
-	eg, ctx := errgroup.WithContext(ctx)
-	for _, listener := range d.snippetCommentListeners {
-		eg.Go(func() error {
-			return listener.OnSnippetComment(ctx, event)
-		})
-	}
-	return eg.Wait()
+	return processEvent(ctx, d.snippetCommentListeners, SnippetCommentListener.OnSnippetComment, event)
 }
 
 func (d *Dispatcher) processSubGroupEvent(ctx context.Context, event *gitlab.SubGroupEvent) error {
-	eg, ctx := errgroup.WithContext(ctx)
-	for _, listener := range d.subGroupListeners {
-		eg.Go(func() error {
-			return listener.OnSubGroup(ctx, event)
-		})
-	}
-	return eg.Wait()
+	return processEvent(ctx, d.subGroupListeners, SubGroupListener.OnSubGroup, event)
 }
 
 func (d *Dispatcher) processTagEvent(ctx context.Context, event *gitlab.TagEvent) error {
-	eg, ctx := errgroup.WithContext(ctx)
-	for _, listener := range d.tagListeners {
-		eg.Go(func() error {
-			return listener.OnTag(ctx, event)
-		})
-	}
-	return eg.Wait()
+	return processEvent(ctx, d.tagListeners, TagListener.OnTag, event)
 }
 
 func (d *Dispatcher) processWikiPageEvent(ctx context.Context, event *gitlab.WikiPageEvent) error {
+	return processEvent(ctx, d.wikiPageListeners, WikiPageListener.OnWikiPage, event)
+}
+
+func processEvent[E any, L any](ctx context.Context, listeners []L, handler func(L, context.Context, E) error, event E) error {
 	eg, ctx := errgroup.WithContext(ctx)
-	for _, listener := range d.wikiPageListeners {
+	for _, listener := range listeners {
 		eg.Go(func() error {
-			return listener.OnWikiPage(ctx, event)
+			return handler(listener, ctx, event)
 		})
 	}
 	return eg.Wait()
