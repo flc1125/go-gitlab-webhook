@@ -2,6 +2,7 @@ package gitlabwebhook
 
 import (
 	"context"
+	"crypto/subtle"
 	"errors"
 	"io"
 	"net/http"
@@ -292,7 +293,8 @@ func (d *Dispatcher) DispatchRequest(req *http.Request, opts ...DispatchRequestO
 	// check token if provided
 	if o.token != "" {
 		token := req.Header.Get("X-Gitlab-Token")
-		if token != o.token {
+		// constant time compare to prevent timing attacks on token comparison
+		if subtle.ConstantTimeCompare([]byte(token), []byte(o.token)) != 1 {
 			return ErrInvalidToken
 		}
 	}
