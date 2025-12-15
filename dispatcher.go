@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"sync"
+	"sync/atomic"
 
 	gitlab "gitlab.com/gitlab-org/api/client-go"
 )
@@ -16,8 +17,7 @@ var (
 	ErrInvalidToken     = errors.New("gitlab-webhook: invalid token")
 )
 
-type Dispatcher struct {
-	mu                                  sync.RWMutex
+type eventListeners struct {
 	buildListeners                      []BuildListener
 	commitCommentListeners              []CommitCommentListener
 	deploymentListeners                 []DeploymentListener
@@ -37,6 +37,11 @@ type Dispatcher struct {
 	subGroupListeners                   []SubGroupListener
 	tagListeners                        []TagListener
 	wikiPageListeners                   []WikiPageListener
+}
+
+type Dispatcher struct {
+	listeners atomic.Pointer[eventListeners]
+	mu        sync.Mutex // serializes writes
 }
 
 type Option func(*Dispatcher)
@@ -135,118 +140,170 @@ func (d *Dispatcher) RegisterListeners(listeners ...any) {
 	}
 }
 
+func (d *Dispatcher) loadListeners() *eventListeners {
+	l := d.listeners.Load()
+	if l == nil {
+		return &eventListeners{}
+	}
+	return l
+}
+
+func (d *Dispatcher) copyListeners() *eventListeners {
+	old := d.loadListeners()
+	newListeners := *old
+	return &newListeners
+}
+
 func (d *Dispatcher) RegisterBuildListener(listeners ...BuildListener) {
 	d.mu.Lock()
 	defer d.mu.Unlock()
-	d.buildListeners = append(d.buildListeners, listeners...)
+	l := d.copyListeners()
+	l.buildListeners = append(l.buildListeners, listeners...)
+	d.listeners.Store(l)
 }
 
 func (d *Dispatcher) RegisterCommitCommentListener(listeners ...CommitCommentListener) {
 	d.mu.Lock()
 	defer d.mu.Unlock()
-	d.commitCommentListeners = append(d.commitCommentListeners, listeners...)
+	l := d.copyListeners()
+	l.commitCommentListeners = append(l.commitCommentListeners, listeners...)
+	d.listeners.Store(l)
 }
 
 func (d *Dispatcher) RegisterDeploymentListener(listeners ...DeploymentListener) {
 	d.mu.Lock()
 	defer d.mu.Unlock()
-	d.deploymentListeners = append(d.deploymentListeners, listeners...)
+	l := d.copyListeners()
+	l.deploymentListeners = append(l.deploymentListeners, listeners...)
+	d.listeners.Store(l)
 }
 
 func (d *Dispatcher) RegisterFeatureFlagListener(listeners ...FeatureFlagListener) {
 	d.mu.Lock()
 	defer d.mu.Unlock()
-	d.featureFlagListeners = append(d.featureFlagListeners, listeners...)
+	l := d.copyListeners()
+	l.featureFlagListeners = append(l.featureFlagListeners, listeners...)
+	d.listeners.Store(l)
 }
 
 func (d *Dispatcher) RegisterGroupResourceAccessTokenListener(listeners ...GroupResourceAccessTokenListener) {
 	d.mu.Lock()
 	defer d.mu.Unlock()
-	d.groupResourceAccessTokenListeners = append(d.groupResourceAccessTokenListeners, listeners...)
+	l := d.copyListeners()
+	l.groupResourceAccessTokenListeners = append(l.groupResourceAccessTokenListeners, listeners...)
+	d.listeners.Store(l)
 }
 
 func (d *Dispatcher) RegisterIssueCommentListener(listeners ...IssueCommentListener) {
 	d.mu.Lock()
 	defer d.mu.Unlock()
-	d.issueCommentListeners = append(d.issueCommentListeners, listeners...)
+	l := d.copyListeners()
+	l.issueCommentListeners = append(l.issueCommentListeners, listeners...)
+	d.listeners.Store(l)
 }
 
 func (d *Dispatcher) RegisterIssueListener(listeners ...IssueListener) {
 	d.mu.Lock()
 	defer d.mu.Unlock()
-	d.issueListeners = append(d.issueListeners, listeners...)
+	l := d.copyListeners()
+	l.issueListeners = append(l.issueListeners, listeners...)
+	d.listeners.Store(l)
 }
 
 func (d *Dispatcher) RegisterJobListener(listeners ...JobListener) {
 	d.mu.Lock()
 	defer d.mu.Unlock()
-	d.jobListeners = append(d.jobListeners, listeners...)
+	l := d.copyListeners()
+	l.jobListeners = append(l.jobListeners, listeners...)
+	d.listeners.Store(l)
 }
 
 func (d *Dispatcher) RegisterMemberListener(listeners ...MemberListener) {
 	d.mu.Lock()
 	defer d.mu.Unlock()
-	d.memberListeners = append(d.memberListeners, listeners...)
+	l := d.copyListeners()
+	l.memberListeners = append(l.memberListeners, listeners...)
+	d.listeners.Store(l)
 }
 
 func (d *Dispatcher) RegisterMergeCommentListener(listeners ...MergeCommentListener) {
 	d.mu.Lock()
 	defer d.mu.Unlock()
-	d.mergeCommentListeners = append(d.mergeCommentListeners, listeners...)
+	l := d.copyListeners()
+	l.mergeCommentListeners = append(l.mergeCommentListeners, listeners...)
+	d.listeners.Store(l)
 }
 
 func (d *Dispatcher) RegisterMergeListener(listeners ...MergeListener) {
 	d.mu.Lock()
 	defer d.mu.Unlock()
-	d.mergeListeners = append(d.mergeListeners, listeners...)
+	l := d.copyListeners()
+	l.mergeListeners = append(l.mergeListeners, listeners...)
+	d.listeners.Store(l)
 }
 
 func (d *Dispatcher) RegisterPipelineListener(listeners ...PipelineListener) {
 	d.mu.Lock()
 	defer d.mu.Unlock()
-	d.pipelineListeners = append(d.pipelineListeners, listeners...)
+	l := d.copyListeners()
+	l.pipelineListeners = append(l.pipelineListeners, listeners...)
+	d.listeners.Store(l)
 }
 
 func (d *Dispatcher) RegisterProjectResourceAccessTokenListener(listeners ...ProjectResourceAccessTokenListener) {
 	d.mu.Lock()
 	defer d.mu.Unlock()
-	d.projectResourceAccessTokenListeners = append(d.projectResourceAccessTokenListeners, listeners...)
+	l := d.copyListeners()
+	l.projectResourceAccessTokenListeners = append(l.projectResourceAccessTokenListeners, listeners...)
+	d.listeners.Store(l)
 }
 
 func (d *Dispatcher) RegisterPushListener(listeners ...PushListener) {
 	d.mu.Lock()
 	defer d.mu.Unlock()
-	d.pushListeners = append(d.pushListeners, listeners...)
+	l := d.copyListeners()
+	l.pushListeners = append(l.pushListeners, listeners...)
+	d.listeners.Store(l)
 }
 
 func (d *Dispatcher) RegisterReleaseListener(listeners ...ReleaseListener) {
 	d.mu.Lock()
 	defer d.mu.Unlock()
-	d.releaseListeners = append(d.releaseListeners, listeners...)
+	l := d.copyListeners()
+	l.releaseListeners = append(l.releaseListeners, listeners...)
+	d.listeners.Store(l)
 }
 
 func (d *Dispatcher) RegisterSnippetCommentListener(listeners ...SnippetCommentListener) {
 	d.mu.Lock()
 	defer d.mu.Unlock()
-	d.snippetCommentListeners = append(d.snippetCommentListeners, listeners...)
+	l := d.copyListeners()
+	l.snippetCommentListeners = append(l.snippetCommentListeners, listeners...)
+	d.listeners.Store(l)
 }
 
 func (d *Dispatcher) RegisterSubGroupListener(listeners ...SubGroupListener) {
 	d.mu.Lock()
 	defer d.mu.Unlock()
-	d.subGroupListeners = append(d.subGroupListeners, listeners...)
+	l := d.copyListeners()
+	l.subGroupListeners = append(l.subGroupListeners, listeners...)
+	d.listeners.Store(l)
 }
 
 func (d *Dispatcher) RegisterTagListener(listeners ...TagListener) {
 	d.mu.Lock()
 	defer d.mu.Unlock()
-	d.tagListeners = append(d.tagListeners, listeners...)
+	l := d.copyListeners()
+	l.tagListeners = append(l.tagListeners, listeners...)
+	d.listeners.Store(l)
 }
 
 func (d *Dispatcher) RegisterWikiPageListener(listeners ...WikiPageListener) {
 	d.mu.Lock()
 	defer d.mu.Unlock()
-	d.wikiPageListeners = append(d.wikiPageListeners, listeners...)
+	l := d.copyListeners()
+	l.wikiPageListeners = append(l.wikiPageListeners, listeners...)
+	d.listeners.Store(l)
 }
 
 func (d *Dispatcher) Dispatch(ctx context.Context, event any) error {
@@ -349,136 +406,79 @@ func (d *Dispatcher) DispatchRequest(req *http.Request, opts ...DispatchRequestO
 }
 
 func (d *Dispatcher) processBuildEvent(ctx context.Context, event *gitlab.BuildEvent) error {
-	d.mu.RLock()
-	listeners := d.buildListeners
-	d.mu.RUnlock()
-	return processEvent(ctx, listeners, BuildListener.OnBuild, event)
+	return processEvent(ctx, d.loadListeners().buildListeners, BuildListener.OnBuild, event)
 }
 
 func (d *Dispatcher) processCommitCommentEvent(ctx context.Context, event *gitlab.CommitCommentEvent) error {
-	d.mu.RLock()
-	listeners := d.commitCommentListeners
-	d.mu.RUnlock()
-	return processEvent(ctx, listeners, CommitCommentListener.OnCommitComment, event)
+	return processEvent(ctx, d.loadListeners().commitCommentListeners, CommitCommentListener.OnCommitComment, event)
 }
 
 func (d *Dispatcher) processDeploymentEvent(ctx context.Context, event *gitlab.DeploymentEvent) error {
-	d.mu.RLock()
-	listeners := d.deploymentListeners
-	d.mu.RUnlock()
-	return processEvent(ctx, listeners, DeploymentListener.OnDeployment, event)
+	return processEvent(ctx, d.loadListeners().deploymentListeners, DeploymentListener.OnDeployment, event)
 }
 
 func (d *Dispatcher) processFeatureFlagEvent(ctx context.Context, event *gitlab.FeatureFlagEvent) error {
-	d.mu.RLock()
-	listeners := d.featureFlagListeners
-	d.mu.RUnlock()
-	return processEvent(ctx, listeners, FeatureFlagListener.OnFeatureFlag, event)
+	return processEvent(ctx, d.loadListeners().featureFlagListeners, FeatureFlagListener.OnFeatureFlag, event)
 }
 
 func (d *Dispatcher) processGroupResourceAccessTokenEvent(ctx context.Context, event *gitlab.GroupResourceAccessTokenEvent) error { //nolint:lll
-	d.mu.RLock()
-	listeners := d.groupResourceAccessTokenListeners
-	d.mu.RUnlock()
-	return processEvent(ctx, listeners, GroupResourceAccessTokenListener.OnGroupResourceAccessToken, event)
+	return processEvent(ctx, d.loadListeners().groupResourceAccessTokenListeners, GroupResourceAccessTokenListener.OnGroupResourceAccessToken, event)
 }
 
 func (d *Dispatcher) processIssueCommentEvent(ctx context.Context, event *gitlab.IssueCommentEvent) error {
-	d.mu.RLock()
-	listeners := d.issueCommentListeners
-	d.mu.RUnlock()
-	return processEvent(ctx, listeners, IssueCommentListener.OnIssueComment, event)
+	return processEvent(ctx, d.loadListeners().issueCommentListeners, IssueCommentListener.OnIssueComment, event)
 }
 
 func (d *Dispatcher) processIssueEvent(ctx context.Context, event *gitlab.IssueEvent) error {
-	d.mu.RLock()
-	listeners := d.issueListeners
-	d.mu.RUnlock()
-	return processEvent(ctx, listeners, IssueListener.OnIssue, event)
+	return processEvent(ctx, d.loadListeners().issueListeners, IssueListener.OnIssue, event)
 }
 
 func (d *Dispatcher) processJobEvent(ctx context.Context, event *gitlab.JobEvent) error {
-	d.mu.RLock()
-	listeners := d.jobListeners
-	d.mu.RUnlock()
-	return processEvent(ctx, listeners, JobListener.OnJob, event)
+	return processEvent(ctx, d.loadListeners().jobListeners, JobListener.OnJob, event)
 }
 
 func (d *Dispatcher) processMemberEvent(ctx context.Context, event *gitlab.MemberEvent) error {
-	d.mu.RLock()
-	listeners := d.memberListeners
-	d.mu.RUnlock()
-	return processEvent(ctx, listeners, MemberListener.OnMember, event)
+	return processEvent(ctx, d.loadListeners().memberListeners, MemberListener.OnMember, event)
 }
 
 func (d *Dispatcher) processMergeCommentEvent(ctx context.Context, event *gitlab.MergeCommentEvent) error {
-	d.mu.RLock()
-	listeners := d.mergeCommentListeners
-	d.mu.RUnlock()
-	return processEvent(ctx, listeners, MergeCommentListener.OnMergeComment, event)
+	return processEvent(ctx, d.loadListeners().mergeCommentListeners, MergeCommentListener.OnMergeComment, event)
 }
 
 func (d *Dispatcher) processMergeEvent(ctx context.Context, event *gitlab.MergeEvent) error {
-	d.mu.RLock()
-	listeners := d.mergeListeners
-	d.mu.RUnlock()
-	return processEvent(ctx, listeners, MergeListener.OnMerge, event)
+	return processEvent(ctx, d.loadListeners().mergeListeners, MergeListener.OnMerge, event)
 }
 
 func (d *Dispatcher) processPipelineEvent(ctx context.Context, event *gitlab.PipelineEvent) error {
-	d.mu.RLock()
-	listeners := d.pipelineListeners
-	d.mu.RUnlock()
-	return processEvent(ctx, listeners, PipelineListener.OnPipeline, event)
+	return processEvent(ctx, d.loadListeners().pipelineListeners, PipelineListener.OnPipeline, event)
 }
 
 func (d *Dispatcher) processProjectResourceAccessTokenEvent(ctx context.Context, event *gitlab.ProjectResourceAccessTokenEvent) error { //nolint:lll
-	d.mu.RLock()
-	listeners := d.projectResourceAccessTokenListeners
-	d.mu.RUnlock()
-	return processEvent(ctx, listeners, ProjectResourceAccessTokenListener.OnProjectResourceAccessToken, event)
+	return processEvent(ctx, d.loadListeners().projectResourceAccessTokenListeners, ProjectResourceAccessTokenListener.OnProjectResourceAccessToken, event)
 }
 
 func (d *Dispatcher) processPushEvent(ctx context.Context, event *gitlab.PushEvent) error {
-	d.mu.RLock()
-	listeners := d.pushListeners
-	d.mu.RUnlock()
-	return processEvent(ctx, listeners, PushListener.OnPush, event)
+	return processEvent(ctx, d.loadListeners().pushListeners, PushListener.OnPush, event)
 }
 
 func (d *Dispatcher) processReleaseEvent(ctx context.Context, event *gitlab.ReleaseEvent) error {
-	d.mu.RLock()
-	listeners := d.releaseListeners
-	d.mu.RUnlock()
-	return processEvent(ctx, listeners, ReleaseListener.OnRelease, event)
+	return processEvent(ctx, d.loadListeners().releaseListeners, ReleaseListener.OnRelease, event)
 }
 
 func (d *Dispatcher) processSnippetCommentEvent(ctx context.Context, event *gitlab.SnippetCommentEvent) error {
-	d.mu.RLock()
-	listeners := d.snippetCommentListeners
-	d.mu.RUnlock()
-	return processEvent(ctx, listeners, SnippetCommentListener.OnSnippetComment, event)
+	return processEvent(ctx, d.loadListeners().snippetCommentListeners, SnippetCommentListener.OnSnippetComment, event)
 }
 
 func (d *Dispatcher) processSubGroupEvent(ctx context.Context, event *gitlab.SubGroupEvent) error {
-	d.mu.RLock()
-	listeners := d.subGroupListeners
-	d.mu.RUnlock()
-	return processEvent(ctx, listeners, SubGroupListener.OnSubGroup, event)
+	return processEvent(ctx, d.loadListeners().subGroupListeners, SubGroupListener.OnSubGroup, event)
 }
 
 func (d *Dispatcher) processTagEvent(ctx context.Context, event *gitlab.TagEvent) error {
-	d.mu.RLock()
-	listeners := d.tagListeners
-	d.mu.RUnlock()
-	return processEvent(ctx, listeners, TagListener.OnTag, event)
+	return processEvent(ctx, d.loadListeners().tagListeners, TagListener.OnTag, event)
 }
 
 func (d *Dispatcher) processWikiPageEvent(ctx context.Context, event *gitlab.WikiPageEvent) error {
-	d.mu.RLock()
-	listeners := d.wikiPageListeners
-	d.mu.RUnlock()
-	return processEvent(ctx, listeners, WikiPageListener.OnWikiPage, event)
+	return processEvent(ctx, d.loadListeners().wikiPageListeners, WikiPageListener.OnWikiPage, event)
 }
 
 func processEvent[E any, L any](ctx context.Context, listeners []L, handler func(L, context.Context, E) error, event E) error {
