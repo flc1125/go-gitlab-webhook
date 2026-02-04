@@ -6,7 +6,7 @@ tool github.com/golangci/golangci-lint/v2/cmd/golangci-lint
 
 require (
 	github.com/stretchr/testify v1.11.1
-	gitlab.com/gitlab-org/api/client-go v1.25.0
+	gitlab.com/gitlab-org/api/client-go v1.27.0
 )
 
 require (
