@@ -36,6 +36,7 @@ type Dispatcher struct {
 	snippetCommentListeners             []SnippetCommentListener
 	subGroupListeners                   []SubGroupListener
 	tagListeners                        []TagListener
+	vulnerabilityListeners              []VulnerabilityListener
 	wikiPageListeners                   []WikiPageListener
 }
 
@@ -133,6 +134,10 @@ func (d *Dispatcher) RegisterListeners(listeners ...any) {
 			d.RegisterTagListener(l)
 		}
 
+		if l, ok := listener.(VulnerabilityListener); ok {
+			d.RegisterVulnerabilityListener(l)
+		}
+
 		if l, ok := listener.(WikiPageListener); ok {
 			d.RegisterWikiPageListener(l)
 		}
@@ -215,6 +220,10 @@ func (d *Dispatcher) RegisterTagListener(listeners ...TagListener) {
 	d.tagListeners = append(d.tagListeners, listeners...)
 }
 
+func (d *Dispatcher) RegisterVulnerabilityListener(listeners ...VulnerabilityListener) {
+	d.vulnerabilityListeners = append(d.vulnerabilityListeners, listeners...)
+}
+
 func (d *Dispatcher) RegisterWikiPageListener(listeners ...WikiPageListener) {
 	d.wikiPageListeners = append(d.wikiPageListeners, listeners...)
 }
@@ -259,6 +268,8 @@ func (d *Dispatcher) Dispatch(ctx context.Context, event any) error {
 		return d.processSubGroupEvent(ctx, e)
 	case *gitlab.TagEvent:
 		return d.processTagEvent(ctx, e)
+	case *gitlab.VulnerabilityEvent:
+		return d.processVulnerabilityEvent(ctx, e)
 	case *gitlab.WikiPageEvent:
 		return d.processWikiPageEvent(ctx, e)
 	default:
@@ -394,6 +405,10 @@ func (d *Dispatcher) processSubGroupEvent(ctx context.Context, event *gitlab.Sub
 
 func (d *Dispatcher) processTagEvent(ctx context.Context, event *gitlab.TagEvent) error {
 	return processEvent(ctx, d.tagListeners, TagListener.OnTag, event)
+}
+
+func (d *Dispatcher) processVulnerabilityEvent(ctx context.Context, event *gitlab.VulnerabilityEvent) error {
+	return processEvent(ctx, d.vulnerabilityListeners, VulnerabilityListener.OnVulnerability, event)
 }
 
 func (d *Dispatcher) processWikiPageEvent(ctx context.Context, event *gitlab.WikiPageEvent) error {

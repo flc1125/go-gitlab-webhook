@@ -67,6 +67,7 @@ func TestDispatcher_Dispatch(t *testing.T) {
 		{"snippet comment", gitlab.EventTypeNote, "testdata/webhooks/note_snippet.json"}, //nolint:lll
 		{"subgroup", gitlab.EventTypeSubGroup, "testdata/webhooks/subgroup.json"},        //nolint:lll
 		{"tag", gitlab.EventTypeTagPush, "testdata/webhooks/tag_push.json"},
+		{"vulnerability", gitlab.EventTypeVulnerability, "testdata/webhooks/vulnerability.json"}, //nolint:lll
 		{"wiki page", gitlab.EventTypeWikiPage, "testdata/webhooks/wiki_page.json"}, //nolint:lll
 	}
 
@@ -114,6 +115,7 @@ var (
 	_ SnippetCommentListener             = (*testListener)(nil)
 	_ SubGroupListener                   = (*testListener)(nil)
 	_ TagListener                        = (*testListener)(nil)
+	_ VulnerabilityListener              = (*testListener)(nil)
 	_ WikiPageListener                   = (*testListener)(nil)
 )
 
@@ -229,6 +231,12 @@ func (t *testListener) OnSubGroup(ctx context.Context, event *gitlab.SubGroupEve
 func (t *testListener) OnTag(ctx context.Context, event *gitlab.TagEvent) error {
 	testDispatcherContext(ctx, t.t)
 	assert.Equal(t.t, "Example", event.Project.Name)
+	return nil
+}
+
+func (t *testListener) OnVulnerability(ctx context.Context, event *gitlab.VulnerabilityEvent) error {
+	testDispatcherContext(ctx, t.t)
+	assert.Equal(t.t, "Potential SQL Injection", event.ObjectAttributes.Title)
 	return nil
 }
 
