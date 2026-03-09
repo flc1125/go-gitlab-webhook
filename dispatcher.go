@@ -31,6 +31,7 @@ type Dispatcher struct {
 	mergeListeners                      []MergeListener
 	pipelineListeners                   []PipelineListener
 	projectResourceAccessTokenListeners []ProjectResourceAccessTokenListener
+	projectWebhookListeners             []ProjectWebhookListener
 	pushListeners                       []PushListener
 	releaseListeners                    []ReleaseListener
 	snippetCommentListeners             []SnippetCommentListener
@@ -111,6 +112,10 @@ func (d *Dispatcher) RegisterListeners(listeners ...any) {
 
 		if l, ok := listener.(ProjectResourceAccessTokenListener); ok {
 			d.RegisterProjectResourceAccessTokenListener(l)
+		}
+
+		if l, ok := listener.(ProjectWebhookListener); ok {
+			d.RegisterProjectWebhookListener(l)
 		}
 
 		if l, ok := listener.(PushListener); ok {
@@ -195,6 +200,10 @@ func (d *Dispatcher) RegisterProjectResourceAccessTokenListener(listeners ...Pro
 	d.projectResourceAccessTokenListeners = append(d.projectResourceAccessTokenListeners, listeners...)
 }
 
+func (d *Dispatcher) RegisterProjectWebhookListener(listeners ...ProjectWebhookListener) {
+	d.projectWebhookListeners = append(d.projectWebhookListeners, listeners...)
+}
+
 func (d *Dispatcher) RegisterPushListener(listeners ...PushListener) {
 	d.pushListeners = append(d.pushListeners, listeners...)
 }
@@ -249,6 +258,8 @@ func (d *Dispatcher) Dispatch(ctx context.Context, event any) error {
 		return d.processPipelineEvent(ctx, e)
 	case *gitlab.ProjectResourceAccessTokenEvent:
 		return d.processProjectResourceAccessTokenEvent(ctx, e)
+	case *gitlab.ProjectWebhookEvent:
+		return d.processProjectWebhookEvent(ctx, e)
 	case *gitlab.PushEvent:
 		return d.processPushEvent(ctx, e)
 	case *gitlab.ReleaseEvent:
@@ -374,6 +385,10 @@ func (d *Dispatcher) processPipelineEvent(ctx context.Context, event *gitlab.Pip
 
 func (d *Dispatcher) processProjectResourceAccessTokenEvent(ctx context.Context, event *gitlab.ProjectResourceAccessTokenEvent) error { //nolint:lll
 	return processEvent(ctx, d.projectResourceAccessTokenListeners, ProjectResourceAccessTokenListener.OnProjectResourceAccessToken, event)
+}
+
+func (d *Dispatcher) processProjectWebhookEvent(ctx context.Context, event *gitlab.ProjectWebhookEvent) error {
+	return processEvent(ctx, d.projectWebhookListeners, ProjectWebhookListener.OnProjectWebhook, event)
 }
 
 func (d *Dispatcher) processPushEvent(ctx context.Context, event *gitlab.PushEvent) error {

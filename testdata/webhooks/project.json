@@ -1,0 +1,17 @@
+{
+  "event_name": "project_create",
+  "created_at": "2012-07-21T07:30:54Z",
+  "updated_at": "2012-07-21T07:38:22Z",
+  "name": "StoreCloud",
+  "path": "storecloud",
+  "path_with_namespace": "jsmith/storecloud",
+  "project_id": 74,
+  "project_namespace_id": 78,
+  "owners": [
+    {
+      "name": "John Smith",
+      "email": "johnsmith@example.com"
+    }
+  ],
+  "project_visibility": "private"
+}

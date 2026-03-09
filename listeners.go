@@ -62,6 +62,10 @@ type ProjectResourceAccessTokenListener interface {
 	OnProjectResourceAccessToken(ctx context.Context, event *gitlab.ProjectResourceAccessTokenEvent) error
 }
 
+type ProjectWebhookListener interface {
+	OnProjectWebhook(ctx context.Context, event *gitlab.ProjectWebhookEvent) error
+}
+
 type PushListener interface {
 	OnPush(ctx context.Context, event *gitlab.PushEvent) error
 }
