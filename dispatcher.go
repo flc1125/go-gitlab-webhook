@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"sync"
 
-	gitlab "gitlab.com/gitlab-org/api/client-go"
+	gitlab "gitlab.com/gitlab-org/api/client-go/v2"
 )
 
 var (
