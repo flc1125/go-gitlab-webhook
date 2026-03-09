@@ -2,7 +2,7 @@
 
 ![Supported Go Versions](https://img.shields.io/badge/Go-%3E%3D1.25.0-blue)
 [![Package Version](https://badgen.net/github/release/flc1125/go-gitlab-webhook/stable)](https://github.com/flc1125/go-gitlab-webhook/releases)
-[![GoDoc](https://pkg.go.dev/badge/github.com/flc1125/go-gitlab-webhook/v2)](https://pkg.go.dev/github.com/flc1125/go-gitlab-webhook/v2)
+[![GoDoc](https://pkg.go.dev/badge/github.com/flc1125/go-gitlab-webhook/v3)](https://pkg.go.dev/github.com/flc1125/go-gitlab-webhook/v3)
 [![codecov](https://codecov.io/gh/flc1125/go-gitlab-webhook/graph/badge.svg?token=QPTHZ5L9GT)](https://codecov.io/gh/flc1125/go-gitlab-webhook)
 [![Go Report Card](https://goreportcard.com/badge/github.com/flc1125/go-gitlab-webhook)](https://goreportcard.com/report/github.com/flc1125/go-gitlab-webhook)
 [![lint](https://github.com/flc1125/go-gitlab-webhook/actions/workflows/lint.yml/badge.svg)](https://github.com/flc1125/go-gitlab-webhook/actions/workflows/lint.yml)
@@ -22,7 +22,7 @@ This is a simple webhook dispatcher for Gitlab. It listens for incoming webhooks
 ## 📦 Installation
 
 ```shell
-go get github.com/flc1125/go-gitlab-webhook/v2
+go get github.com/flc1125/go-gitlab-webhook/v3
 ```
 
 ## 💻 Usage
@@ -34,7 +34,7 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/flc1125/go-gitlab-webhook/v2"
+	"github.com/flc1125/go-gitlab-webhook/v3"
 	"gitlab.com/gitlab-org/api/client-go"
 )
 
