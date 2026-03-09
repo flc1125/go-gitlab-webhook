@@ -28,6 +28,7 @@ type Dispatcher struct {
 	jobListeners                        []JobListener
 	memberListeners                     []MemberListener
 	mergeCommentListeners               []MergeCommentListener
+	milestoneListeners                  []MilestoneListener
 	mergeListeners                      []MergeListener
 	pipelineListeners                   []PipelineListener
 	projectResourceAccessTokenListeners []ProjectResourceAccessTokenListener
@@ -95,6 +96,10 @@ func (d *Dispatcher) RegisterListeners(listeners ...any) {
 
 		if l, ok := listener.(MemberListener); ok {
 			d.RegisterMemberListener(l)
+		}
+
+		if l, ok := listener.(MilestoneListener); ok {
+			d.RegisterMilestoneListener(l)
 		}
 
 		if l, ok := listener.(MergeCommentListener); ok {
@@ -179,6 +184,10 @@ func (d *Dispatcher) RegisterMemberListener(listeners ...MemberListener) {
 	d.memberListeners = append(d.memberListeners, listeners...)
 }
 
+func (d *Dispatcher) RegisterMilestoneListener(listeners ...MilestoneListener) {
+	d.milestoneListeners = append(d.milestoneListeners, listeners...)
+}
+
 func (d *Dispatcher) RegisterMergeCommentListener(listeners ...MergeCommentListener) {
 	d.mergeCommentListeners = append(d.mergeCommentListeners, listeners...)
 }
@@ -241,6 +250,8 @@ func (d *Dispatcher) Dispatch(ctx context.Context, event any) error {
 		return d.processJobEvent(ctx, e)
 	case *gitlab.MemberEvent:
 		return d.processMemberEvent(ctx, e)
+	case *gitlab.MilestoneWebhookEvent:
+		return d.processMilestoneEvent(ctx, e)
 	case *gitlab.MergeCommentEvent:
 		return d.processMergeCommentEvent(ctx, e)
 	case *gitlab.MergeEvent:
@@ -358,6 +369,10 @@ func (d *Dispatcher) processJobEvent(ctx context.Context, event *gitlab.JobEvent
 
 func (d *Dispatcher) processMemberEvent(ctx context.Context, event *gitlab.MemberEvent) error {
 	return processEvent(ctx, d.memberListeners, MemberListener.OnMember, event)
+}
+
+func (d *Dispatcher) processMilestoneEvent(ctx context.Context, event *gitlab.MilestoneWebhookEvent) error {
+	return processEvent(ctx, d.milestoneListeners, MilestoneListener.OnMilestone, event)
 }
 
 func (d *Dispatcher) processMergeCommentEvent(ctx context.Context, event *gitlab.MergeCommentEvent) error {
