@@ -31,6 +31,7 @@ type Dispatcher struct {
 	mergeCommentListeners               []MergeCommentListener
 	mergeListeners                      []MergeListener
 	pipelineListeners                   []PipelineListener
+	projectListeners                    []ProjectListener
 	projectResourceAccessTokenListeners []ProjectResourceAccessTokenListener
 	pushListeners                       []PushListener
 	releaseListeners                    []ReleaseListener
@@ -113,6 +114,10 @@ func (d *Dispatcher) RegisterListeners(listeners ...any) {
 
 		if l, ok := listener.(PipelineListener); ok {
 			d.RegisterPipelineListener(l)
+		}
+
+		if l, ok := listener.(ProjectListener); ok {
+			d.RegisterProjectListener(l)
 		}
 
 		if l, ok := listener.(ProjectResourceAccessTokenListener); ok {
@@ -205,6 +210,10 @@ func (d *Dispatcher) RegisterPipelineListener(listeners ...PipelineListener) {
 	d.pipelineListeners = append(d.pipelineListeners, listeners...)
 }
 
+func (d *Dispatcher) RegisterProjectListener(listeners ...ProjectListener) {
+	d.projectListeners = append(d.projectListeners, listeners...)
+}
+
 func (d *Dispatcher) RegisterProjectResourceAccessTokenListener(listeners ...ProjectResourceAccessTokenListener) {
 	d.projectResourceAccessTokenListeners = append(d.projectResourceAccessTokenListeners, listeners...)
 }
@@ -267,6 +276,8 @@ func (d *Dispatcher) Dispatch(ctx context.Context, event any) error {
 		return d.processMergeEvent(ctx, e)
 	case *gitlab.PipelineEvent:
 		return d.processPipelineEvent(ctx, e)
+	case *gitlab.ProjectWebhookEvent:
+		return d.processProjectEvent(ctx, e)
 	case *gitlab.ProjectResourceAccessTokenEvent:
 		return d.processProjectResourceAccessTokenEvent(ctx, e)
 	case *gitlab.PushEvent:
@@ -396,6 +407,10 @@ func (d *Dispatcher) processMergeEvent(ctx context.Context, event *gitlab.MergeE
 
 func (d *Dispatcher) processPipelineEvent(ctx context.Context, event *gitlab.PipelineEvent) error {
 	return processEvent(ctx, d.pipelineListeners, PipelineListener.OnPipeline, event)
+}
+
+func (d *Dispatcher) processProjectEvent(ctx context.Context, event *gitlab.ProjectWebhookEvent) error {
+	return processEvent(ctx, d.projectListeners, ProjectListener.OnProject, event)
 }
 
 func (d *Dispatcher) processProjectResourceAccessTokenEvent(ctx context.Context, event *gitlab.ProjectResourceAccessTokenEvent) error { //nolint:lll
