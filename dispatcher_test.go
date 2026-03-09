@@ -63,6 +63,7 @@ func TestDispatcher_Dispatch(t *testing.T) {
 		{"merge comment", gitlab.EventTypeNote, "testdata/webhooks/note_merge_request.json"}, //nolint:lll
 		{"merge", gitlab.EventTypeMergeRequest, "testdata/webhooks/merge_request.json"},      //nolint:lll
 		{"pipeline", gitlab.EventTypePipeline, "testdata/webhooks/pipeline.json"},            //nolint:lll
+		{"project", gitlab.EventTypeProject, "testdata/webhooks/project.json"},
 		{"push", gitlab.EventTypePush, "testdata/webhooks/push.json"},
 		{"release", gitlab.EventTypeRelease, "testdata/webhooks/release.json"},           //nolint:lll
 		{"snippet comment", gitlab.EventTypeNote, "testdata/webhooks/note_snippet.json"}, //nolint:lll
@@ -111,6 +112,7 @@ var (
 	_ MergeCommentListener               = (*testListener)(nil)
 	_ MergeListener                      = (*testListener)(nil)
 	_ PipelineListener                   = (*testListener)(nil)
+	_ ProjectListener                    = (*testListener)(nil)
 	_ ProjectResourceAccessTokenListener = (*testListener)(nil)
 	_ PushListener                       = (*testListener)(nil)
 	_ ReleaseListener                    = (*testListener)(nil)
@@ -203,6 +205,13 @@ func (t *testListener) OnMerge(ctx context.Context, event *gitlab.MergeEvent) er
 func (t *testListener) OnPipeline(ctx context.Context, event *gitlab.PipelineEvent) error {
 	testDispatcherContext(ctx, t.t)
 	assert.Equal(t.t, "Gitlab Test", event.Project.Name)
+	return nil
+}
+
+func (t *testListener) OnProject(ctx context.Context, event *gitlab.ProjectWebhookEvent) error {
+	testDispatcherContext(ctx, t.t)
+	assert.Equal(t.t, "Flight", event.Name)
+	assert.Equal(t.t, "flightjs/flight", event.PathWithNamespace)
 	return nil
 }
 

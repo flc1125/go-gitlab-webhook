@@ -1,0 +1,17 @@
+{
+  "event_name": "project_create",
+  "created_at": "2024-01-24 16:27:40 UTC",
+  "updated_at": "2024-01-24 16:27:40 UTC",
+  "name": "Flight",
+  "path": "flight",
+  "path_with_namespace": "flightjs/flight",
+  "project_id": 7,
+  "project_namespace_id": 35,
+  "owners": [
+    {
+      "name": "Administrator",
+      "email": "admin@example.com"
+    }
+  ],
+  "project_visibility": "private"
+}

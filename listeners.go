@@ -62,6 +62,10 @@ type PipelineListener interface {
 	OnPipeline(ctx context.Context, event *gitlab.PipelineEvent) error
 }
 
+type ProjectListener interface {
+	OnProject(ctx context.Context, event *gitlab.ProjectWebhookEvent) error
+}
+
 type ProjectResourceAccessTokenListener interface {
 	OnProjectResourceAccessToken(ctx context.Context, event *gitlab.ProjectResourceAccessTokenEvent) error
 }
