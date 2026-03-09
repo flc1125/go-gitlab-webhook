@@ -25,6 +25,14 @@ This is a simple webhook dispatcher for Gitlab. It listens for incoming webhooks
 go get github.com/flc1125/go-gitlab-webhook/v3
 ```
 
+## 🔗 Compatibility
+
+| go-gitlab-webhook | GitLab Go Client |
+| --- | --- |
+| `1.x` | [xanzy/go-gitlab](https://github.com/xanzy/go-gitlab) |
+| `2.x` | [gitlab-org/api/client-go](https://gitlab.com/gitlab-org/api/client-go) |
+| `3.x` | [gitlab-org/api/client-go/v2](https://gitlab.com/gitlab-org/api/client-go/v2) |
+
 ## 💻 Usage
 
 ```go
