@@ -27,8 +27,8 @@ type Dispatcher struct {
 	issueListeners                      []IssueListener
 	jobListeners                        []JobListener
 	memberListeners                     []MemberListener
-	mergeCommentListeners               []MergeCommentListener
 	milestoneListeners                  []MilestoneListener
+	mergeCommentListeners               []MergeCommentListener
 	mergeListeners                      []MergeListener
 	pipelineListeners                   []PipelineListener
 	projectResourceAccessTokenListeners []ProjectResourceAccessTokenListener
