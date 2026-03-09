@@ -59,6 +59,7 @@ func TestDispatcher_Dispatch(t *testing.T) {
 		{"issue", gitlab.EventTypeIssue, "testdata/webhooks/issue.json"},                                                           //nolint:lll
 		{"job", gitlab.EventTypeJob, "testdata/webhooks/job.json"},
 		{"member", gitlab.EventTypeMember, "testdata/webhooks/member.json"},
+		{"milestone", gitlab.EventTypeMilestone, "testdata/webhooks/milestone.json"},
 		{"merge comment", gitlab.EventTypeNote, "testdata/webhooks/note_merge_request.json"}, //nolint:lll
 		{"merge", gitlab.EventTypeMergeRequest, "testdata/webhooks/merge_request.json"},      //nolint:lll
 		{"pipeline", gitlab.EventTypePipeline, "testdata/webhooks/pipeline.json"},            //nolint:lll
@@ -105,6 +106,7 @@ var (
 	_ IssueListener                      = (*testListener)(nil)
 	_ JobListener                        = (*testListener)(nil)
 	_ MemberListener                     = (*testListener)(nil)
+	_ MilestoneListener                  = (*testListener)(nil)
 	_ MergeCommentListener               = (*testListener)(nil)
 	_ MergeListener                      = (*testListener)(nil)
 	_ PipelineListener                   = (*testListener)(nil)
@@ -175,6 +177,12 @@ func (t *testListener) OnJob(ctx context.Context, event *gitlab.JobEvent) error 
 func (t *testListener) OnMember(ctx context.Context, event *gitlab.MemberEvent) error {
 	testDispatcherContext(ctx, t.t)
 	assert.Equal(t.t, "User1", event.UserName)
+	return nil
+}
+
+func (t *testListener) OnMilestone(ctx context.Context, event *gitlab.MilestoneWebhookEvent) error {
+	testDispatcherContext(ctx, t.t)
+	assert.Equal(t.t, "Gitlab Test", event.Project.Name)
 	return nil
 }
 
