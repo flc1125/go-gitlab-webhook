@@ -46,6 +46,10 @@ type MemberListener interface {
 	OnMember(ctx context.Context, event *gitlab.MemberEvent) error
 }
 
+type MilestoneListener interface {
+	OnMilestone(ctx context.Context, event *gitlab.MilestoneWebhookEvent) error
+}
+
 type MergeCommentListener interface {
 	OnMergeComment(ctx context.Context, event *gitlab.MergeCommentEvent) error
 }
