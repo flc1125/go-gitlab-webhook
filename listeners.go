@@ -86,6 +86,10 @@ type TagListener interface {
 	OnTag(ctx context.Context, event *gitlab.TagEvent) error
 }
 
+type VulnerabilityListener interface {
+	OnVulnerability(ctx context.Context, event *gitlab.VulnerabilityEvent) error
+}
+
 type WikiPageListener interface {
 	OnWikiPage(ctx context.Context, event *gitlab.WikiPageEvent) error
 }
