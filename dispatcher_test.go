@@ -49,9 +49,10 @@ func TestDispatcher_Dispatch(t *testing.T) {
 		eventType gitlab.EventType
 		filepath  string
 	}{
-		{"build", gitlab.EventTypeBuild, "testdata/webhooks/build.json"},                                                           //nolint:lll
-		{"commit comment", gitlab.EventTypeNote, "testdata/webhooks/note_commit.json"},                                             //nolint:lll
-		{"deployment", gitlab.EventTypeDeployment, "testdata/webhooks/deployment.json"},                                            //nolint:lll
+		{"build", gitlab.EventTypeBuild, "testdata/webhooks/build.json"},                //nolint:lll
+		{"commit comment", gitlab.EventTypeNote, "testdata/webhooks/note_commit.json"},  //nolint:lll
+		{"deployment", gitlab.EventTypeDeployment, "testdata/webhooks/deployment.json"}, //nolint:lll
+		{"emoji", gitlab.EventTypeEmoji, "testdata/webhooks/emoji.json"},
 		{"feature flag", gitlab.EventTypeFeatureFlag, "testdata/webhooks/feature_flag.json"},                                       //nolint:lll
 		{"group resource access token", gitlab.EventTypeResourceAccessToken, "testdata/webhooks/resource_access_token_group.json"}, //nolint:lll
 		{"issue comment", gitlab.EventTypeNote, "testdata/webhooks/note_issue.json"},                                               //nolint:lll
@@ -97,6 +98,7 @@ var (
 	_ BuildListener                      = (*testListener)(nil)
 	_ CommitCommentListener              = (*testListener)(nil)
 	_ DeploymentListener                 = (*testListener)(nil)
+	_ EmojiListener                      = (*testListener)(nil)
 	_ FeatureFlagListener                = (*testListener)(nil)
 	_ GroupResourceAccessTokenListener   = (*testListener)(nil)
 	_ IssueCommentListener               = (*testListener)(nil)
@@ -130,6 +132,13 @@ func (t *testListener) OnCommitComment(ctx context.Context, event *gitlab.Commit
 func (t *testListener) OnDeployment(ctx context.Context, event *gitlab.DeploymentEvent) error {
 	testDispatcherContext(ctx, t.t)
 	assert.Equal(t.t, "test-deployment-webhooks", event.Project.Name)
+	return nil
+}
+
+func (t *testListener) OnEmoji(ctx context.Context, event *gitlab.EmojiEvent) error {
+	testDispatcherContext(ctx, t.t)
+	assert.Equal(t.t, "awesome-project", event.Project.Name)
+	assert.Equal(t.t, "thumbsup", event.ObjectAttributes.Name)
 	return nil
 }
 

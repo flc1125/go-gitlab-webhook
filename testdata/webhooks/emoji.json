@@ -1,0 +1,41 @@
+{
+  "object_kind": "emoji",
+  "event_type": "award",
+  "user": {
+    "id": 1,
+    "name": "Administrator",
+    "username": "root",
+    "avatar_url": "http://example.com/avatar.png",
+    "email": "root@example.com"
+  },
+  "project_id": 1,
+  "project": {
+    "id": 1,
+    "name": "awesome-project",
+    "description": "An example project",
+    "web_url": "http://example.com/projects/awesome-project",
+    "avatar_url": "",
+    "git_ssh_url": "git@example.com:awesome-project.git",
+    "git_http_url": "http://example.com/awesome-project.git",
+    "namespace": "example",
+    "visibility_level": 20,
+    "path_with_namespace": "example/awesome-project",
+    "default_branch": "main",
+    "ci_config_path": "",
+    "homepage": "http://example.com/projects/awesome-project",
+    "url": "git@example.com:awesome-project.git",
+    "ssh_url": "git@example.com:awesome-project.git",
+    "http_url": "http://example.com/awesome-project.git"
+  },
+  "object_attributes": {
+    "user_id": 1,
+    "created_at": "2025-01-01T00:00:00Z",
+    "id": 1,
+    "name": "thumbsup",
+    "awardable_type": "Issue",
+    "awardable_id": 2,
+    "updated_at": "2025-01-01T00:00:00Z",
+    "action": "award",
+    "awarded_on_url": "http://example.com/projects/awesome-project/issues/2"
+  }
+}

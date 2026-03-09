@@ -20,6 +20,7 @@ type Dispatcher struct {
 	buildListeners                      []BuildListener
 	commitCommentListeners              []CommitCommentListener
 	deploymentListeners                 []DeploymentListener
+	emojiListeners                      []EmojiListener
 	featureFlagListeners                []FeatureFlagListener
 	groupResourceAccessTokenListeners   []GroupResourceAccessTokenListener
 	issueCommentListeners               []IssueCommentListener
@@ -66,6 +67,10 @@ func (d *Dispatcher) RegisterListeners(listeners ...any) {
 
 		if l, ok := listener.(DeploymentListener); ok {
 			d.RegisterDeploymentListener(l)
+		}
+
+		if l, ok := listener.(EmojiListener); ok {
+			d.RegisterEmojiListener(l)
 		}
 
 		if l, ok := listener.(FeatureFlagListener); ok {
@@ -146,6 +151,10 @@ func (d *Dispatcher) RegisterDeploymentListener(listeners ...DeploymentListener)
 	d.deploymentListeners = append(d.deploymentListeners, listeners...)
 }
 
+func (d *Dispatcher) RegisterEmojiListener(listeners ...EmojiListener) {
+	d.emojiListeners = append(d.emojiListeners, listeners...)
+}
+
 func (d *Dispatcher) RegisterFeatureFlagListener(listeners ...FeatureFlagListener) {
 	d.featureFlagListeners = append(d.featureFlagListeners, listeners...)
 }
@@ -218,6 +227,8 @@ func (d *Dispatcher) Dispatch(ctx context.Context, event any) error {
 		return d.processCommitCommentEvent(ctx, e)
 	case *gitlab.DeploymentEvent:
 		return d.processDeploymentEvent(ctx, e)
+	case *gitlab.EmojiEvent:
+		return d.processEmojiEvent(ctx, e)
 	case *gitlab.FeatureFlagEvent:
 		return d.processFeatureFlagEvent(ctx, e)
 	case *gitlab.GroupResourceAccessTokenEvent:
@@ -319,6 +330,10 @@ func (d *Dispatcher) processCommitCommentEvent(ctx context.Context, event *gitla
 
 func (d *Dispatcher) processDeploymentEvent(ctx context.Context, event *gitlab.DeploymentEvent) error {
 	return processEvent(ctx, d.deploymentListeners, DeploymentListener.OnDeployment, event)
+}
+
+func (d *Dispatcher) processEmojiEvent(ctx context.Context, event *gitlab.EmojiEvent) error {
+	return processEvent(ctx, d.emojiListeners, EmojiListener.OnEmoji, event)
 }
 
 func (d *Dispatcher) processFeatureFlagEvent(ctx context.Context, event *gitlab.FeatureFlagEvent) error {
