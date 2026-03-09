@@ -18,6 +18,10 @@ type DeploymentListener interface {
 	OnDeployment(ctx context.Context, event *gitlab.DeploymentEvent) error
 }
 
+type EmojiListener interface {
+	OnEmoji(ctx context.Context, event *gitlab.EmojiEvent) error
+}
+
 type FeatureFlagListener interface {
 	OnFeatureFlag(ctx context.Context, event *gitlab.FeatureFlagEvent) error
 }
