@@ -20,7 +20,7 @@ If the upstream GitLab Go client already supports parsing a webhook event, but t
 Before making changes in this repository, confirm that the upstream `ParseWebhook(...)` already supports the event:
 
 - Docs: https://pkg.go.dev/gitlab.com/gitlab-org/api/client-go/v2
-- Source: https://gitlab.com/gitlab-org/api/client-go/-/blob/v2.4.0/event_parsing.go
+- Source: https://gitlab.com/gitlab-org/api/client-go/-/blob/main/event_parsing.go
 
 Dispatcher support in this repository should only be added after the upstream client can already parse the webhook payload into the corresponding event struct.
 
