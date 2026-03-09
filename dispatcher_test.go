@@ -60,9 +60,9 @@ func TestDispatcher_Dispatch(t *testing.T) {
 		{"job", gitlab.EventTypeJob, "testdata/webhooks/job.json"},
 		{"member", gitlab.EventTypeMember, "testdata/webhooks/member.json"},
 		{"milestone", gitlab.EventTypeMilestone, "testdata/webhooks/milestone.json"},
-		{"merge comment", gitlab.EventTypeNote, "testdata/webhooks/note_merge_request.json"},                                           //nolint:lll
-		{"merge", gitlab.EventTypeMergeRequest, "testdata/webhooks/merge_request.json"},                                                //nolint:lll
-		{"pipeline", gitlab.EventTypePipeline, "testdata/webhooks/pipeline.json"},                                                      //nolint:lll
+		{"merge comment", gitlab.EventTypeNote, "testdata/webhooks/note_merge_request.json"}, //nolint:lll
+		{"merge", gitlab.EventTypeMergeRequest, "testdata/webhooks/merge_request.json"},      //nolint:lll
+		{"pipeline", gitlab.EventTypePipeline, "testdata/webhooks/pipeline.json"},            //nolint:lll
 		{"project resource access token", gitlab.EventTypeResourceAccessToken, "testdata/webhooks/resource_access_token_project.json"}, //nolint:lll
 		{"project webhook", gitlab.EventTypeProject, "testdata/webhooks/project.json"},                                                 //nolint:lll
 		{"push", gitlab.EventTypePush, "testdata/webhooks/push.json"},
