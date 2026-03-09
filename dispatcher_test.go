@@ -68,7 +68,7 @@ func TestDispatcher_Dispatch(t *testing.T) {
 		{"subgroup", gitlab.EventTypeSubGroup, "testdata/webhooks/subgroup.json"},        //nolint:lll
 		{"tag", gitlab.EventTypeTagPush, "testdata/webhooks/tag_push.json"},
 		{"vulnerability", gitlab.EventTypeVulnerability, "testdata/webhooks/vulnerability.json"}, //nolint:lll
-		{"wiki page", gitlab.EventTypeWikiPage, "testdata/webhooks/wiki_page.json"}, //nolint:lll
+		{"wiki page", gitlab.EventTypeWikiPage, "testdata/webhooks/wiki_page.json"},              //nolint:lll
 	}
 
 	for _, tt := range tests {
