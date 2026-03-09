@@ -49,9 +49,9 @@ func TestDispatcher_Dispatch(t *testing.T) {
 		eventType gitlab.EventType
 		filepath  string
 	}{
-		{"build", gitlab.EventTypeBuild, "testdata/webhooks/build.json"},                                                           //nolint:lll
-		{"commit comment", gitlab.EventTypeNote, "testdata/webhooks/note_commit.json"},                                             //nolint:lll
-		{"deployment", gitlab.EventTypeDeployment, "testdata/webhooks/deployment.json"},                                            //nolint:lll
+		{"build", gitlab.EventTypeBuild, "testdata/webhooks/build.json"},                //nolint:lll
+		{"commit comment", gitlab.EventTypeNote, "testdata/webhooks/note_commit.json"},  //nolint:lll
+		{"deployment", gitlab.EventTypeDeployment, "testdata/webhooks/deployment.json"}, //nolint:lll
 		{"emoji", gitlab.EventTypeEmoji, "testdata/webhooks/emoji.json"},
 		{"feature flag", gitlab.EventTypeFeatureFlag, "testdata/webhooks/feature_flag.json"},                                       //nolint:lll
 		{"group resource access token", gitlab.EventTypeResourceAccessToken, "testdata/webhooks/resource_access_token_group.json"}, //nolint:lll
