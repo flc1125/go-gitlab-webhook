@@ -68,39 +68,34 @@ func TestDispatcher_DispatchRequestWithToken(t *testing.T) {
 	invalidToken := "wrong-token"
 
 	tests := []struct {
-		name           string
-		token          string
-		headerToken    string
-		expectedError  error
-		shouldDispatch bool
+		name          string
+		token         string
+		headerToken   string
+		expectedError error
 	}{
 		{
-			name:           "valid token should dispatch successfully",
-			token:          validToken,
-			headerToken:    validToken,
-			expectedError:  nil,
-			shouldDispatch: true,
+			name:          "valid token should dispatch successfully",
+			token:         validToken,
+			headerToken:   validToken,
+			expectedError: nil,
 		},
 		{
-			name:           "invalid token should return ErrInvalidToken",
-			token:          validToken,
-			headerToken:    invalidToken,
-			expectedError:  ErrInvalidToken,
-			shouldDispatch: false,
+			name:          "invalid token should return ErrInvalidToken",
+			token:         validToken,
+			headerToken:   invalidToken,
+			expectedError: ErrInvalidToken,
 		},
 		{
-			name:           "missing token header should return ErrInvalidToken",
-			token:          validToken,
-			headerToken:    "",
-			expectedError:  ErrInvalidToken,
-			shouldDispatch: false,
+			name:          "missing token header should return ErrInvalidToken",
+			token:         validToken,
+			headerToken:   "",
+			expectedError: ErrInvalidToken,
 		},
 		{
-			name:           "no token provided should dispatch successfully",
-			token:          "",
-			headerToken:    "",
-			expectedError:  nil,
-			shouldDispatch: true,
+			name:          "no token provided should dispatch successfully",
+			token:         "",
+			headerToken:   "",
+			expectedError: nil,
 		},
 	}
 
