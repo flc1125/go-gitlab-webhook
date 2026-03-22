@@ -57,8 +57,8 @@ func NewDispatcher(opts ...Option) *Dispatcher {
 
 func (d *Dispatcher) RegisterListeners(listeners ...any) {
 	for _, listener := range listeners {
-		for _, register := range dispatcherListenerRegistrations {
-			register(d, listener)
+		for _, event := range dispatcherEvents {
+			event.register(d, listener)
 		}
 	}
 }
@@ -156,8 +156,8 @@ func (d *Dispatcher) RegisterWikiPageListener(listeners ...WikiPageListener) {
 }
 
 func (d *Dispatcher) Dispatch(ctx context.Context, event any) error {
-	for _, dispatch := range dispatcherEventDispatchers {
-		handled, err := dispatch(d, ctx, event)
+	for _, descriptor := range dispatcherEvents {
+		handled, err := descriptor.dispatch(d, ctx, event)
 		if handled {
 			return err
 		}
