@@ -1,7 +1,6 @@
 package gitlabwebhook
 
 import (
-	"context"
 	"errors"
 	"net/http"
 	"testing"
@@ -51,7 +50,7 @@ func TestDispatcher_DispatchRequest_Fixtures(t *testing.T) {
 
 			err := dispatcher.DispatchRequest(
 				req,
-				DispatchRequestWithContext(newDispatcherContext(context.Background())),
+				DispatchRequestWithContext(newDispatcherContext(t.Context())),
 			)
 
 			assert.NoError(t, err)

@@ -1,7 +1,6 @@
 package gitlabwebhook
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"testing"
@@ -48,7 +47,7 @@ func TestDispatcher_DispatchWebhook_Fixtures(t *testing.T) {
 			dispatcher.RegisterListeners(listener)
 
 			err := dispatcher.DispatchWebhook(
-				newDispatcherContext(context.Background()),
+				newDispatcherContext(t.Context()),
 				tt.eventType,
 				loadFixture(t, tt.filepath),
 			)
@@ -62,7 +61,7 @@ func TestDispatcher_DispatchWebhook_Fixtures(t *testing.T) {
 func TestDispatcher_Dispatch_UnsupportedEvent(t *testing.T) {
 	dispatcher := NewDispatcher()
 
-	err := dispatcher.Dispatch(context.Background(), struct{}{})
+	err := dispatcher.Dispatch(t.Context(), struct{}{})
 
 	assert.ErrorIs(t, err, ErrUnsupportedEvent)
 }
@@ -70,7 +69,7 @@ func TestDispatcher_Dispatch_UnsupportedEvent(t *testing.T) {
 func TestDispatcher_DispatchWebhook_InvalidPayload(t *testing.T) {
 	dispatcher := NewDispatcher()
 
-	err := dispatcher.DispatchWebhook(context.Background(), gitlab.EventTypePush, []byte(`{"invalid"`))
+	err := dispatcher.DispatchWebhook(t.Context(), gitlab.EventTypePush, []byte(`{"invalid"`))
 
 	assert.Error(t, err)
 	assert.NotErrorIs(t, err, ErrUnsupportedEvent)
@@ -80,7 +79,7 @@ func TestDispatcher_DispatchWebhook_NoListeners(t *testing.T) {
 	dispatcher := NewDispatcher()
 
 	err := dispatcher.DispatchWebhook(
-		context.Background(),
+		t.Context(),
 		gitlab.EventTypePush,
 		loadFixture(t, "testdata/webhooks/push.json"),
 	)
@@ -98,7 +97,7 @@ func TestDispatcher_DispatchWebhook_ListenerErrorsJoined(t *testing.T) {
 	))
 
 	err := dispatcher.DispatchWebhook(
-		context.Background(),
+		t.Context(),
 		gitlab.EventTypePush,
 		loadFixture(t, "testdata/webhooks/push.json"),
 	)
@@ -118,7 +117,7 @@ func TestDispatcher_Dispatch_ParsedEvent_NoListeners(t *testing.T) {
 		t.Fatalf("parse push fixture: %v", err)
 	}
 
-	err = dispatcher.Dispatch(context.Background(), event)
+	err = dispatcher.Dispatch(t.Context(), event)
 
 	assert.NoError(t, err)
 }
