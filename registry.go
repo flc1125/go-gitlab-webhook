@@ -6,7 +6,7 @@ import (
 
 type eventDescriptor interface {
 	register(*Dispatcher, any)
-	dispatch(*Dispatcher, context.Context, any) (bool, error)
+	dispatch(context.Context, *Dispatcher, any) (bool, error)
 }
 
 type typedEventDescriptor[E any, L any] struct {
@@ -50,7 +50,7 @@ func (d typedEventDescriptor[E, L]) register(dispatcher *Dispatcher, listener an
 	d.set(dispatcher, append(d.listeners(dispatcher), typedListener))
 }
 
-func (d typedEventDescriptor[E, L]) dispatch(dispatcher *Dispatcher, ctx context.Context, event any) (bool, error) {
+func (d typedEventDescriptor[E, L]) dispatch(ctx context.Context, dispatcher *Dispatcher, event any) (bool, error) {
 	typedEvent, ok := event.(E)
 	if !ok {
 		return false, nil

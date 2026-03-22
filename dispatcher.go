@@ -157,7 +157,7 @@ func (d *Dispatcher) RegisterWikiPageListener(listeners ...WikiPageListener) {
 
 func (d *Dispatcher) Dispatch(ctx context.Context, event any) error {
 	for _, descriptor := range dispatcherEvents {
-		handled, err := descriptor.dispatch(d, ctx, event)
+		handled, err := descriptor.dispatch(ctx, d, event)
 		if handled {
 			return err
 		}
