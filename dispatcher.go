@@ -156,56 +156,14 @@ func (d *Dispatcher) RegisterWikiPageListener(listeners ...WikiPageListener) {
 }
 
 func (d *Dispatcher) Dispatch(ctx context.Context, event any) error {
-	switch e := event.(type) {
-	case *gitlab.BuildEvent:
-		return d.processBuildEvent(ctx, e)
-	case *gitlab.CommitCommentEvent:
-		return d.processCommitCommentEvent(ctx, e)
-	case *gitlab.DeploymentEvent:
-		return d.processDeploymentEvent(ctx, e)
-	case *gitlab.EmojiEvent:
-		return d.processEmojiEvent(ctx, e)
-	case *gitlab.FeatureFlagEvent:
-		return d.processFeatureFlagEvent(ctx, e)
-	case *gitlab.GroupResourceAccessTokenEvent:
-		return d.processGroupResourceAccessTokenEvent(ctx, e)
-	case *gitlab.IssueCommentEvent:
-		return d.processIssueCommentEvent(ctx, e)
-	case *gitlab.IssueEvent:
-		return d.processIssueEvent(ctx, e)
-	case *gitlab.JobEvent:
-		return d.processJobEvent(ctx, e)
-	case *gitlab.MemberEvent:
-		return d.processMemberEvent(ctx, e)
-	case *gitlab.MilestoneWebhookEvent:
-		return d.processMilestoneEvent(ctx, e)
-	case *gitlab.MergeCommentEvent:
-		return d.processMergeCommentEvent(ctx, e)
-	case *gitlab.MergeEvent:
-		return d.processMergeEvent(ctx, e)
-	case *gitlab.PipelineEvent:
-		return d.processPipelineEvent(ctx, e)
-	case *gitlab.ProjectWebhookEvent:
-		return d.processProjectEvent(ctx, e)
-	case *gitlab.ProjectResourceAccessTokenEvent:
-		return d.processProjectResourceAccessTokenEvent(ctx, e)
-	case *gitlab.PushEvent:
-		return d.processPushEvent(ctx, e)
-	case *gitlab.ReleaseEvent:
-		return d.processReleaseEvent(ctx, e)
-	case *gitlab.SnippetCommentEvent:
-		return d.processSnippetCommentEvent(ctx, e)
-	case *gitlab.SubGroupEvent:
-		return d.processSubGroupEvent(ctx, e)
-	case *gitlab.TagEvent:
-		return d.processTagEvent(ctx, e)
-	case *gitlab.VulnerabilityEvent:
-		return d.processVulnerabilityEvent(ctx, e)
-	case *gitlab.WikiPageEvent:
-		return d.processWikiPageEvent(ctx, e)
-	default:
-		return ErrUnsupportedEvent
+	for _, dispatch := range dispatcherEventDispatchers {
+		handled, err := dispatch(d, ctx, event)
+		if handled {
+			return err
+		}
 	}
+
+	return ErrUnsupportedEvent
 }
 
 func (d *Dispatcher) DispatchWebhook(ctx context.Context, eventType gitlab.EventType, payload []byte) error {
@@ -213,99 +171,8 @@ func (d *Dispatcher) DispatchWebhook(ctx context.Context, eventType gitlab.Event
 	if err != nil {
 		return err
 	}
+
 	return d.Dispatch(ctx, event)
-}
-
-func (d *Dispatcher) processBuildEvent(ctx context.Context, event *gitlab.BuildEvent) error {
-	return processEvent(ctx, d.buildListeners, BuildListener.OnBuild, event)
-}
-
-func (d *Dispatcher) processCommitCommentEvent(ctx context.Context, event *gitlab.CommitCommentEvent) error {
-	return processEvent(ctx, d.commitCommentListeners, CommitCommentListener.OnCommitComment, event)
-}
-
-func (d *Dispatcher) processDeploymentEvent(ctx context.Context, event *gitlab.DeploymentEvent) error {
-	return processEvent(ctx, d.deploymentListeners, DeploymentListener.OnDeployment, event)
-}
-
-func (d *Dispatcher) processEmojiEvent(ctx context.Context, event *gitlab.EmojiEvent) error {
-	return processEvent(ctx, d.emojiListeners, EmojiListener.OnEmoji, event)
-}
-
-func (d *Dispatcher) processFeatureFlagEvent(ctx context.Context, event *gitlab.FeatureFlagEvent) error {
-	return processEvent(ctx, d.featureFlagListeners, FeatureFlagListener.OnFeatureFlag, event)
-}
-
-func (d *Dispatcher) processGroupResourceAccessTokenEvent(ctx context.Context, event *gitlab.GroupResourceAccessTokenEvent) error { //nolint:lll
-	return processEvent(ctx, d.groupResourceAccessTokenListeners, GroupResourceAccessTokenListener.OnGroupResourceAccessToken, event)
-}
-
-func (d *Dispatcher) processIssueCommentEvent(ctx context.Context, event *gitlab.IssueCommentEvent) error {
-	return processEvent(ctx, d.issueCommentListeners, IssueCommentListener.OnIssueComment, event)
-}
-
-func (d *Dispatcher) processIssueEvent(ctx context.Context, event *gitlab.IssueEvent) error {
-	return processEvent(ctx, d.issueListeners, IssueListener.OnIssue, event)
-}
-
-func (d *Dispatcher) processJobEvent(ctx context.Context, event *gitlab.JobEvent) error {
-	return processEvent(ctx, d.jobListeners, JobListener.OnJob, event)
-}
-
-func (d *Dispatcher) processMemberEvent(ctx context.Context, event *gitlab.MemberEvent) error {
-	return processEvent(ctx, d.memberListeners, MemberListener.OnMember, event)
-}
-
-func (d *Dispatcher) processMilestoneEvent(ctx context.Context, event *gitlab.MilestoneWebhookEvent) error {
-	return processEvent(ctx, d.milestoneListeners, MilestoneListener.OnMilestone, event)
-}
-
-func (d *Dispatcher) processMergeCommentEvent(ctx context.Context, event *gitlab.MergeCommentEvent) error {
-	return processEvent(ctx, d.mergeCommentListeners, MergeCommentListener.OnMergeComment, event)
-}
-
-func (d *Dispatcher) processMergeEvent(ctx context.Context, event *gitlab.MergeEvent) error {
-	return processEvent(ctx, d.mergeListeners, MergeListener.OnMerge, event)
-}
-
-func (d *Dispatcher) processPipelineEvent(ctx context.Context, event *gitlab.PipelineEvent) error {
-	return processEvent(ctx, d.pipelineListeners, PipelineListener.OnPipeline, event)
-}
-
-func (d *Dispatcher) processProjectEvent(ctx context.Context, event *gitlab.ProjectWebhookEvent) error {
-	return processEvent(ctx, d.projectListeners, ProjectListener.OnProject, event)
-}
-
-func (d *Dispatcher) processProjectResourceAccessTokenEvent(ctx context.Context, event *gitlab.ProjectResourceAccessTokenEvent) error { //nolint:lll
-	return processEvent(ctx, d.projectResourceAccessTokenListeners, ProjectResourceAccessTokenListener.OnProjectResourceAccessToken, event)
-}
-
-func (d *Dispatcher) processPushEvent(ctx context.Context, event *gitlab.PushEvent) error {
-	return processEvent(ctx, d.pushListeners, PushListener.OnPush, event)
-}
-
-func (d *Dispatcher) processReleaseEvent(ctx context.Context, event *gitlab.ReleaseEvent) error {
-	return processEvent(ctx, d.releaseListeners, ReleaseListener.OnRelease, event)
-}
-
-func (d *Dispatcher) processSnippetCommentEvent(ctx context.Context, event *gitlab.SnippetCommentEvent) error {
-	return processEvent(ctx, d.snippetCommentListeners, SnippetCommentListener.OnSnippetComment, event)
-}
-
-func (d *Dispatcher) processSubGroupEvent(ctx context.Context, event *gitlab.SubGroupEvent) error {
-	return processEvent(ctx, d.subGroupListeners, SubGroupListener.OnSubGroup, event)
-}
-
-func (d *Dispatcher) processTagEvent(ctx context.Context, event *gitlab.TagEvent) error {
-	return processEvent(ctx, d.tagListeners, TagListener.OnTag, event)
-}
-
-func (d *Dispatcher) processVulnerabilityEvent(ctx context.Context, event *gitlab.VulnerabilityEvent) error {
-	return processEvent(ctx, d.vulnerabilityListeners, VulnerabilityListener.OnVulnerability, event)
-}
-
-func (d *Dispatcher) processWikiPageEvent(ctx context.Context, event *gitlab.WikiPageEvent) error {
-	return processEvent(ctx, d.wikiPageListeners, WikiPageListener.OnWikiPage, event)
 }
 
 func processEvent[E any, L any](ctx context.Context, listeners []L, handler func(L, context.Context, E) error, event E) error {
