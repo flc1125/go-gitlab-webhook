@@ -2,10 +2,7 @@ package gitlabwebhook
 
 import (
 	"context"
-	"crypto/subtle"
 	"errors"
-	"io"
-	"net/http"
 	"sync"
 
 	gitlab "gitlab.com/gitlab-org/api/client-go/v2"
@@ -305,52 +302,6 @@ func (d *Dispatcher) DispatchWebhook(ctx context.Context, eventType gitlab.Event
 		return err
 	}
 	return d.Dispatch(ctx, event)
-}
-
-type dispatchRequestOptions struct {
-	ctx   context.Context
-	token string
-}
-
-type DispatchRequestOption func(*dispatchRequestOptions)
-
-func DispatchRequestWithContext(ctx context.Context) DispatchRequestOption {
-	return func(o *dispatchRequestOptions) {
-		o.ctx = ctx
-	}
-}
-
-func DispatchRequestWithToken(token string) DispatchRequestOption {
-	return func(o *dispatchRequestOptions) {
-		o.token = token
-	}
-}
-
-func (d *Dispatcher) DispatchRequest(req *http.Request, opts ...DispatchRequestOption) error {
-	o := &dispatchRequestOptions{
-		ctx: req.Context(),
-	}
-	for _, opt := range opts {
-		opt(o)
-	}
-
-	// check token if provided
-	if o.token != "" {
-		token := req.Header.Get("X-Gitlab-Token")
-		// constant time compare to prevent timing attacks on token comparison
-		if subtle.ConstantTimeCompare([]byte(token), []byte(o.token)) != 1 {
-			return ErrInvalidToken
-		}
-	}
-
-	// read payload
-	payload, err := io.ReadAll(req.Body)
-	if err != nil {
-		return err
-	}
-
-	// dispatch webhook
-	return d.DispatchWebhook(o.ctx, gitlab.HookEventType(req), payload)
 }
 
 func (d *Dispatcher) processBuildEvent(ctx context.Context, event *gitlab.BuildEvent) error {
