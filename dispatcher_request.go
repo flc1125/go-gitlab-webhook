@@ -46,7 +46,7 @@ func validateRequestToken(req *http.Request, token string) error {
 	}
 
 	requestToken := req.Header.Get("X-Gitlab-Token")
-	// Constant-time comparison avoids leaking token length match timing.
+	// Use constant-time comparison to avoid leaking timing about matching contents when token lengths are equal.
 	if subtle.ConstantTimeCompare([]byte(requestToken), []byte(token)) != 1 {
 		return ErrInvalidToken
 	}
