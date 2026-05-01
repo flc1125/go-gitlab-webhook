@@ -47,15 +47,17 @@ func Extract(event any) Metadata { //nolint:cyclop
 			objectKind(e.ObjectKind).
 			project(e.ProjectID, e.Project.PathWithNamespace, e.Project.Name).
 			action(e.ObjectAttributes.Action).
-			attrString(semconv.EmojiAwardableType, e.ObjectAttributes.AwardableType).
+			attrs(semconv.EmojiAwardableType(e.ObjectAttributes.AwardableType)).
 			build()
 	case *gitlab.FeatureFlagEvent:
 		return newBuilder("feature_flag").
 			objectKind(e.ObjectKind).
 			project(e.Project.ID, e.Project.PathWithNamespace, e.Project.Name).
-			attrInt64(semconv.FeatureFlagID, e.ObjectAttributes.ID).
-			attrString(semconv.FeatureFlagName, e.ObjectAttributes.Name).
-			attrBool(semconv.FeatureFlagActive, e.ObjectAttributes.Active).
+			attrs(
+				semconv.FeatureFlagID(e.ObjectAttributes.ID),
+				semconv.FeatureFlagName(e.ObjectAttributes.Name),
+				semconv.FeatureFlagActive(e.ObjectAttributes.Active),
+			).
 			build()
 	case *gitlab.GroupResourceAccessTokenEvent:
 		return newBuilder("resource_access_token").
@@ -63,7 +65,7 @@ func Extract(event any) Metadata { //nolint:cyclop
 			eventName(e.EventName).
 			operation(e.EventName).
 			group(e.Group.GroupID, e.Group.FullPath, e.Group.GroupName).
-			attrInt64(semconv.ResourceAccessTokenID, e.ObjectAttributes.ID).
+			attrs(semconv.ResourceAccessTokenID(e.ObjectAttributes.ID)).
 			build()
 	case *gitlab.IssueCommentEvent:
 		return newBuilder("note").
@@ -99,8 +101,10 @@ func Extract(event any) Metadata { //nolint:cyclop
 			objectKind(e.ObjectKind).
 			project(e.Project.ID, e.Project.PathWithNamespace, e.Project.Name).
 			action(e.Action).
-			attrInt64(semconv.MilestoneIID, e.ObjectAttributes.IID).
-			attrString(semconv.MilestoneState, e.ObjectAttributes.State)
+			attrs(
+				semconv.MilestoneIID(e.ObjectAttributes.IID),
+				semconv.MilestoneState(e.ObjectAttributes.State),
+			)
 		if e.Group != nil {
 			b.group(e.Group.GroupID, e.Group.FullPath, e.Group.GroupName)
 		}
@@ -118,8 +122,10 @@ func Extract(event any) Metadata { //nolint:cyclop
 			project(e.Project.ID, e.Project.PathWithNamespace, e.Project.Name).
 			action(e.ObjectAttributes.Action).
 			mergeRequest(e.ObjectAttributes.IID, e.ObjectAttributes.State).
-			attrString(semconv.MergeRequestMergeStatus, e.ObjectAttributes.MergeStatus).
-			attrString(semconv.MergeRequestDetailedMergeStatus, e.ObjectAttributes.DetailedMergeStatus).
+			attrs(
+				semconv.MergeRequestMergeStatus(e.ObjectAttributes.MergeStatus),
+				semconv.MergeRequestDetailedMergeStatus(e.ObjectAttributes.DetailedMergeStatus),
+			).
 			build()
 	case *gitlab.PipelineEvent:
 		return newBuilder("pipeline").
@@ -135,8 +141,10 @@ func Extract(event any) Metadata { //nolint:cyclop
 			eventName(e.EventName).
 			operation(e.EventName).
 			project(e.ProjectID, e.PathWithNamespace, e.Name).
-			attrInt64(semconv.ProjectNamespaceID, e.ProjectNamespaceID).
-			attrString(semconv.ProjectVisibility, e.ProjectVisibility).
+			attrs(
+				semconv.ProjectNamespaceID(e.ProjectNamespaceID),
+				semconv.ProjectVisibility(e.ProjectVisibility),
+			).
 			build()
 	case *gitlab.ProjectResourceAccessTokenEvent:
 		return newBuilder("resource_access_token").
@@ -144,7 +152,7 @@ func Extract(event any) Metadata { //nolint:cyclop
 			eventName(e.EventName).
 			operation(e.EventName).
 			project(e.Project.ID, e.Project.PathWithNamespace, e.Project.Name).
-			attrInt64(semconv.ResourceAccessTokenID, e.ObjectAttributes.ID).
+			attrs(semconv.ResourceAccessTokenID(e.ObjectAttributes.ID)).
 			build()
 	case *gitlab.PushEvent:
 		return newBuilder("push").
@@ -153,14 +161,14 @@ func Extract(event any) Metadata { //nolint:cyclop
 			project(e.ProjectID, e.Project.PathWithNamespace, e.Project.Name).
 			ref(e.Ref).
 			sha(e.CheckoutSHA).
-			attrInt64(semconv.PushTotalCommitsCount, e.TotalCommitsCount).
+			attrs(semconv.PushTotalCommitsCount(e.TotalCommitsCount)).
 			build()
 	case *gitlab.ReleaseEvent:
 		return newBuilder("release").
 			objectKind(e.ObjectKind).
 			project(e.Project.ID, e.Project.PathWithNamespace, e.Project.Name).
 			action(e.Action).
-			attrString(semconv.ReleaseTag, e.Tag).
+			attrs(semconv.ReleaseTag(e.Tag)).
 			build()
 	case *gitlab.SnippetCommentEvent:
 		return newBuilder("note").
@@ -173,8 +181,10 @@ func Extract(event any) Metadata { //nolint:cyclop
 			eventName(e.EventName).
 			operation(e.EventName).
 			group(e.GroupID, e.FullPath, e.Name).
-			attrInt64(semconv.ParentGroupID, e.ParentGroupID).
-			attrString(semconv.ParentGroupPath, e.ParentFullPath).
+			attrs(
+				semconv.ParentGroupID(e.ParentGroupID),
+				semconv.ParentGroupPath(e.ParentFullPath),
+			).
 			build()
 	case *gitlab.TagEvent:
 		return newBuilder("tag_push").
@@ -183,16 +193,18 @@ func Extract(event any) Metadata { //nolint:cyclop
 			project(e.ProjectID, e.Project.PathWithNamespace, e.Project.Name).
 			ref(e.Ref).
 			sha(e.CheckoutSHA).
-			attrInt64(semconv.PushTotalCommitsCount, e.TotalCommitsCount).
+			attrs(semconv.PushTotalCommitsCount(e.TotalCommitsCount)).
 			build()
 	case *gitlab.VulnerabilityEvent:
 		return newBuilder("vulnerability").
 			objectKind(e.ObjectKind).
 			project(e.ObjectAttributes.ProjectID, "", "").
 			status(e.ObjectAttributes.State).
-			attrString(semconv.VulnerabilityLevel, e.ObjectAttributes.Severity).
-			attrString(semconv.VulnerabilityReport, e.ObjectAttributes.ReportType).
-			attrString(semconv.VulnerabilityState, e.ObjectAttributes.State).
+			attrs(
+				semconv.VulnerabilityLevel(e.ObjectAttributes.Severity),
+				semconv.VulnerabilityReport(e.ObjectAttributes.ReportType),
+				semconv.VulnerabilityState(e.ObjectAttributes.State),
+			).
 			build()
 	case *gitlab.WikiPageEvent:
 		return newBuilder("wiki_page").
@@ -206,108 +218,103 @@ func Extract(event any) Metadata { //nolint:cyclop
 }
 
 type builder struct {
-	eventType string
-	spanName  []string
-	attrs     []attribute.KeyValue
+	eventType  string
+	spanName   []string
+	attributes []attribute.KeyValue
 }
 
 func newBuilder(eventType string) *builder {
 	return &builder{
 		eventType: eventType,
-		attrs: []attribute.KeyValue{
+		attributes: []attribute.KeyValue{
 			semconv.WebhookEventType(eventType),
 		},
 	}
 }
 
 func (b *builder) objectKind(value string) *builder {
-	return b.attrString(semconv.WebhookObjectKind, value)
+	return b.attrs(semconv.WebhookObjectKind(value))
 }
 
 func (b *builder) eventName(value string) *builder {
-	return b.attrString(semconv.WebhookEventName, value)
+	return b.attrs(semconv.WebhookEventName(value))
 }
 
 func (b *builder) project(id int64, path, name string) *builder {
-	return b.
-		attrInt64(semconv.ProjectID, id).
-		attrString(semconv.ProjectPath, path).
-		attrString(semconv.ProjectName, name)
+	return b.attrs(
+		semconv.ProjectID(id),
+		semconv.ProjectPath(path),
+		semconv.ProjectName(name),
+	)
 }
 
 func (b *builder) group(id int64, path, name string) *builder {
-	return b.
-		attrInt64(semconv.GroupID, id).
-		attrString(semconv.GroupPath, path).
-		attrString(semconv.GroupName, name)
+	return b.attrs(
+		semconv.GroupID(id),
+		semconv.GroupPath(path),
+		semconv.GroupName(name),
+	)
 }
 
 func (b *builder) ref(value string) *builder {
-	return b.attrString(semconv.Ref, value)
+	return b.attrs(semconv.Ref(value))
 }
 
 func (b *builder) sha(value string) *builder {
-	return b.attrString(semconv.SHA, value)
+	return b.attrs(semconv.SHA(value))
 }
 
 func (b *builder) action(value string) *builder {
 	b.operation(value)
-	return b.attrString(semconv.WebhookAction, value)
+	return b.attrs(semconv.WebhookAction(value))
 }
 
 func (b *builder) status(value string) *builder {
 	b.operation(value)
-	return b.attrString(semconv.WebhookStatus, value)
+	return b.attrs(semconv.WebhookStatus(value))
 }
 
 func (b *builder) note(noteableType, action string) *builder {
 	b.operation(noteableType)
 	b.operation(action)
-	return b.attrString(semconv.NoteNoteableType, noteableType).attrString(semconv.WebhookAction, action)
+	return b.attrs(
+		semconv.NoteNoteableType(noteableType),
+		semconv.WebhookAction(action),
+	)
 }
 
 func (b *builder) issue(iid int64, state string) *builder {
-	return b.attrInt64(semconv.IssueIID, iid).attrString(semconv.IssueState, state)
+	return b.attrs(
+		semconv.IssueIID(iid),
+		semconv.IssueState(state),
+	)
 }
 
 func (b *builder) job(id int64, name, stage string) *builder {
-	return b.
-		attrInt64(semconv.JobID, id).
-		attrString(semconv.JobName, name).
-		attrString(semconv.JobStage, stage)
+	return b.attrs(
+		semconv.JobID(id),
+		semconv.JobName(name),
+		semconv.JobStage(stage),
+	)
 }
 
 func (b *builder) mergeRequest(iid int64, state string) *builder {
-	return b.attrInt64(semconv.MergeRequestIID, iid).attrString(semconv.MergeRequestState, state)
+	return b.attrs(
+		semconv.MergeRequestIID(iid),
+		semconv.MergeRequestState(state),
+	)
 }
 
 func (b *builder) pipeline(id, iid int64, source string) *builder {
-	return b.
-		attrInt64(semconv.PipelineID, id).
-		attrInt64(semconv.PipelineIID, iid).
-		attrString(semconv.PipelineSource, source)
+	return b.attrs(
+		semconv.PipelineID(id),
+		semconv.PipelineIID(iid),
+		semconv.PipelineSource(source),
+	)
 }
 
-func (b *builder) attrString(keyValue func(string) attribute.KeyValue, value string) *builder {
-	value = strings.TrimSpace(value)
-	if value != "" {
-		b.attrs = append(b.attrs, keyValue(value))
-	}
-
-	return b
-}
-
-func (b *builder) attrInt64(keyValue func(int64) attribute.KeyValue, value int64) *builder {
-	if value != 0 {
-		b.attrs = append(b.attrs, keyValue(value))
-	}
-
-	return b
-}
-
-func (b *builder) attrBool(keyValue func(bool) attribute.KeyValue, value bool) *builder {
-	b.attrs = append(b.attrs, keyValue(value))
-
+func (b *builder) attrs(values ...attribute.KeyValue) *builder {
+	b.attributes = append(b.attributes, values...)
 	return b
 }
 
@@ -350,14 +357,14 @@ func (b *builder) build() Metadata {
 
 	return Metadata{
 		SpanName:   name,
-		Attributes: b.attrs,
+		Attributes: b.attributes,
 	}
 }
 
 func fallback(event any) Metadata {
 	b := newBuilder("unknown")
 	if event != nil {
-		b.attrString(semconv.WebhookGoType, goTypeName(event))
+		b.attrs(semconv.WebhookGoType(goTypeName(event)))
 	}
 
 	return b.build()
