@@ -45,19 +45,9 @@ type Dispatcher struct {
 
 type Option func(*Dispatcher)
 
-type HandlerFunc func(ctx context.Context, event any) error
-
-type Middleware func(next HandlerFunc) HandlerFunc
-
 func RegisterListeners(listeners ...any) Option {
 	return func(d *Dispatcher) {
 		d.RegisterListeners(listeners...)
-	}
-}
-
-func WithMiddlewares(middlewares ...Middleware) Option {
-	return func(d *Dispatcher) {
-		d.Use(middlewares...)
 	}
 }
 
@@ -67,10 +57,6 @@ func NewDispatcher(opts ...Option) *Dispatcher {
 		opt(dispatcher)
 	}
 	return dispatcher
-}
-
-func (d *Dispatcher) Use(middlewares ...Middleware) {
-	d.middlewares = append(d.middlewares, middlewares...)
 }
 
 func (d *Dispatcher) RegisterListeners(listeners ...any) {
