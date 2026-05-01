@@ -76,18 +76,21 @@ test/%:
 
 COVERAGE_MODE    = atomic
 COVERAGE_PROFILE = coverage.out
+COVERAGE_ARGS    = -v -race -coverpkg=./... -covermode=$(COVERAGE_MODE)
 .PHONY: test-coverage
 test-coverage: $(GOCOVMERGE)
 	@set -e; \
+	find . -name "$(COVERAGE_PROFILE)" -exec rm -f {} +; \
+	find . -name coverage.html -exec rm -f {} +; \
 	printf "" > coverage.txt; \
 	for dir in $(ALL_COVERAGE_MOD_DIRS); do \
-	  echo "$(GO) test -v -race -coverpkg=github.com/flc1125/go-gitlab-webhook/... -covermode=$(COVERAGE_MODE) -coverprofile="$(COVERAGE_PROFILE)" $${dir}/..."; \
+	  echo "$(GO) test $(COVERAGE_ARGS) -coverprofile=$(COVERAGE_PROFILE) $${dir}/..."; \
 	  (cd "$${dir}" && \
 	    $(GO) list ./... \
-	    | xargs $(GO) test -coverpkg=./... -covermode=$(COVERAGE_MODE) -coverprofile="$(COVERAGE_PROFILE)" && \
+	    | xargs $(GO) test $(COVERAGE_ARGS) -coverprofile="$(COVERAGE_PROFILE)" && \
 	  $(GO) tool cover -html=coverage.out -o coverage.html); \
 	done; \
-	$(GOCOVMERGE) $$(find . -name coverage.out) > coverage.txt
+	$(GOCOVMERGE) $$(find . -name "$(COVERAGE_PROFILE)" | sort) > coverage.txt
 
 .PHONY: golangci-lint golangci-lint-fix
 golangci-lint-fix: ARGS=--fix
