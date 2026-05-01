@@ -4,47 +4,9 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/flc1125/go-gitlab-webhook/middleware/otel/v3/internal/semconv"
 	"gitlab.com/gitlab-org/api/client-go/v2"
 	"go.opentelemetry.io/otel/attribute"
-)
-
-const (
-	attributeEventType  = "gitlab.webhook.event_type"
-	attributeObjectKind = "gitlab.webhook.object_kind"
-	attributeEventName  = "gitlab.webhook.event_name"
-	attributeAction     = "gitlab.webhook.action"
-	attributeStatus     = "gitlab.webhook.status"
-	attributeGoType     = "gitlab.webhook.go_type"
-
-	attributeProjectID   = "gitlab.project.id"
-	attributeProjectName = "gitlab.project.name"
-	attributeProjectPath = "gitlab.project.path"
-
-	attributeGroupID   = "gitlab.group.id"
-	attributeGroupName = "gitlab.group.name"
-	attributeGroupPath = "gitlab.group.path"
-
-	attributeRef = "gitlab.ref"
-	attributeSHA = "gitlab.sha"
-
-	attributeIssueIID    = "gitlab.issue.iid"
-	attributeIssueState  = "gitlab.issue.state"
-	attributeJobID       = "gitlab.job.id"
-	attributeJobName     = "gitlab.job.name"
-	attributeJobStage    = "gitlab.job.stage"
-	attributeMergeIID    = "gitlab.merge_request.iid"
-	attributeMergeState  = "gitlab.merge_request.state"
-	attributeNoteable    = "gitlab.note.noteable_type"
-	attributePipelineID  = "gitlab.pipeline.id"
-	attributePipelineIID = "gitlab.pipeline.iid"
-	attributePipelineSrc = "gitlab.pipeline.source"
-	attributeReleaseTag  = "gitlab.release.tag"
-
-	attributeMilestoneIID        = "gitlab.milestone.iid"
-	attributeMilestoneState      = "gitlab.milestone.state"
-	attributeVulnerabilityState  = "gitlab.vulnerability.state"
-	attributeVulnerabilityReport = "gitlab.vulnerability.report_type"
-	attributeVulnerabilityLevel  = "gitlab.vulnerability.severity"
 )
 
 // Metadata describes how a GitLab webhook event should be represented in a span.
@@ -85,15 +47,15 @@ func Extract(event any) Metadata { //nolint:cyclop
 			objectKind(e.ObjectKind).
 			project(e.ProjectID, e.Project.PathWithNamespace, e.Project.Name).
 			action(e.ObjectAttributes.Action).
-			attrString("gitlab.emoji.awardable_type", e.ObjectAttributes.AwardableType).
+			attrString(semconv.EmojiAwardableType, e.ObjectAttributes.AwardableType).
 			build()
 	case *gitlab.FeatureFlagEvent:
 		return newBuilder("feature_flag").
 			objectKind(e.ObjectKind).
 			project(e.Project.ID, e.Project.PathWithNamespace, e.Project.Name).
-			attrInt64("gitlab.feature_flag.id", e.ObjectAttributes.ID).
-			attrString("gitlab.feature_flag.name", e.ObjectAttributes.Name).
-			attrBool("gitlab.feature_flag.active", e.ObjectAttributes.Active).
+			attrInt64(semconv.FeatureFlagID, e.ObjectAttributes.ID).
+			attrString(semconv.FeatureFlagName, e.ObjectAttributes.Name).
+			attrBool(semconv.FeatureFlagActive, e.ObjectAttributes.Active).
 			build()
 	case *gitlab.GroupResourceAccessTokenEvent:
 		return newBuilder("resource_access_token").
@@ -101,7 +63,7 @@ func Extract(event any) Metadata { //nolint:cyclop
 			eventName(e.EventName).
 			operation(e.EventName).
 			group(e.Group.GroupID, e.Group.FullPath, e.Group.GroupName).
-			attrInt64("gitlab.resource_access_token.id", e.ObjectAttributes.ID).
+			attrInt64(semconv.ResourceAccessTokenID, e.ObjectAttributes.ID).
 			build()
 	case *gitlab.IssueCommentEvent:
 		return newBuilder("note").
@@ -137,8 +99,8 @@ func Extract(event any) Metadata { //nolint:cyclop
 			objectKind(e.ObjectKind).
 			project(e.Project.ID, e.Project.PathWithNamespace, e.Project.Name).
 			action(e.Action).
-			attrInt64(attributeMilestoneIID, e.ObjectAttributes.IID).
-			attrString(attributeMilestoneState, e.ObjectAttributes.State)
+			attrInt64(semconv.MilestoneIID, e.ObjectAttributes.IID).
+			attrString(semconv.MilestoneState, e.ObjectAttributes.State)
 		if e.Group != nil {
 			b.group(e.Group.GroupID, e.Group.FullPath, e.Group.GroupName)
 		}
@@ -156,8 +118,8 @@ func Extract(event any) Metadata { //nolint:cyclop
 			project(e.Project.ID, e.Project.PathWithNamespace, e.Project.Name).
 			action(e.ObjectAttributes.Action).
 			mergeRequest(e.ObjectAttributes.IID, e.ObjectAttributes.State).
-			attrString("gitlab.merge_request.merge_status", e.ObjectAttributes.MergeStatus).
-			attrString("gitlab.merge_request.detailed_merge_status", e.ObjectAttributes.DetailedMergeStatus).
+			attrString(semconv.MergeRequestMergeStatus, e.ObjectAttributes.MergeStatus).
+			attrString(semconv.MergeRequestDetailedMergeStatus, e.ObjectAttributes.DetailedMergeStatus).
 			build()
 	case *gitlab.PipelineEvent:
 		return newBuilder("pipeline").
@@ -173,8 +135,8 @@ func Extract(event any) Metadata { //nolint:cyclop
 			eventName(e.EventName).
 			operation(e.EventName).
 			project(e.ProjectID, e.PathWithNamespace, e.Name).
-			attrInt64("gitlab.project.namespace_id", e.ProjectNamespaceID).
-			attrString("gitlab.project.visibility", e.ProjectVisibility).
+			attrInt64(semconv.ProjectNamespaceID, e.ProjectNamespaceID).
+			attrString(semconv.ProjectVisibility, e.ProjectVisibility).
 			build()
 	case *gitlab.ProjectResourceAccessTokenEvent:
 		return newBuilder("resource_access_token").
@@ -182,7 +144,7 @@ func Extract(event any) Metadata { //nolint:cyclop
 			eventName(e.EventName).
 			operation(e.EventName).
 			project(e.Project.ID, e.Project.PathWithNamespace, e.Project.Name).
-			attrInt64("gitlab.resource_access_token.id", e.ObjectAttributes.ID).
+			attrInt64(semconv.ResourceAccessTokenID, e.ObjectAttributes.ID).
 			build()
 	case *gitlab.PushEvent:
 		return newBuilder("push").
@@ -191,14 +153,14 @@ func Extract(event any) Metadata { //nolint:cyclop
 			project(e.ProjectID, e.Project.PathWithNamespace, e.Project.Name).
 			ref(e.Ref).
 			sha(e.CheckoutSHA).
-			attrInt64("gitlab.push.total_commits_count", e.TotalCommitsCount).
+			attrInt64(semconv.PushTotalCommitsCount, e.TotalCommitsCount).
 			build()
 	case *gitlab.ReleaseEvent:
 		return newBuilder("release").
 			objectKind(e.ObjectKind).
 			project(e.Project.ID, e.Project.PathWithNamespace, e.Project.Name).
 			action(e.Action).
-			attrString(attributeReleaseTag, e.Tag).
+			attrString(semconv.ReleaseTag, e.Tag).
 			build()
 	case *gitlab.SnippetCommentEvent:
 		return newBuilder("note").
@@ -211,8 +173,8 @@ func Extract(event any) Metadata { //nolint:cyclop
 			eventName(e.EventName).
 			operation(e.EventName).
 			group(e.GroupID, e.FullPath, e.Name).
-			attrInt64("gitlab.parent_group.id", e.ParentGroupID).
-			attrString("gitlab.parent_group.path", e.ParentFullPath).
+			attrInt64(semconv.ParentGroupID, e.ParentGroupID).
+			attrString(semconv.ParentGroupPath, e.ParentFullPath).
 			build()
 	case *gitlab.TagEvent:
 		return newBuilder("tag_push").
@@ -221,16 +183,16 @@ func Extract(event any) Metadata { //nolint:cyclop
 			project(e.ProjectID, e.Project.PathWithNamespace, e.Project.Name).
 			ref(e.Ref).
 			sha(e.CheckoutSHA).
-			attrInt64("gitlab.push.total_commits_count", e.TotalCommitsCount).
+			attrInt64(semconv.PushTotalCommitsCount, e.TotalCommitsCount).
 			build()
 	case *gitlab.VulnerabilityEvent:
 		return newBuilder("vulnerability").
 			objectKind(e.ObjectKind).
 			project(e.ObjectAttributes.ProjectID, "", "").
 			status(e.ObjectAttributes.State).
-			attrString(attributeVulnerabilityLevel, e.ObjectAttributes.Severity).
-			attrString(attributeVulnerabilityReport, e.ObjectAttributes.ReportType).
-			attrString(attributeVulnerabilityState, e.ObjectAttributes.State).
+			attrString(semconv.VulnerabilityLevel, e.ObjectAttributes.Severity).
+			attrString(semconv.VulnerabilityReport, e.ObjectAttributes.ReportType).
+			attrString(semconv.VulnerabilityState, e.ObjectAttributes.State).
 			build()
 	case *gitlab.WikiPageEvent:
 		return newBuilder("wiki_page").
@@ -253,98 +215,98 @@ func newBuilder(eventType string) *builder {
 	return &builder{
 		eventType: eventType,
 		attrs: []attribute.KeyValue{
-			attribute.String(attributeEventType, eventType),
+			semconv.WebhookEventType(eventType),
 		},
 	}
 }
 
 func (b *builder) objectKind(value string) *builder {
-	return b.attrString(attributeObjectKind, value)
+	return b.attrString(semconv.WebhookObjectKind, value)
 }
 
 func (b *builder) eventName(value string) *builder {
-	return b.attrString(attributeEventName, value)
+	return b.attrString(semconv.WebhookEventName, value)
 }
 
 func (b *builder) project(id int64, path, name string) *builder {
 	return b.
-		attrInt64(attributeProjectID, id).
-		attrString(attributeProjectPath, path).
-		attrString(attributeProjectName, name)
+		attrInt64(semconv.ProjectID, id).
+		attrString(semconv.ProjectPath, path).
+		attrString(semconv.ProjectName, name)
 }
 
 func (b *builder) group(id int64, path, name string) *builder {
 	return b.
-		attrInt64(attributeGroupID, id).
-		attrString(attributeGroupPath, path).
-		attrString(attributeGroupName, name)
+		attrInt64(semconv.GroupID, id).
+		attrString(semconv.GroupPath, path).
+		attrString(semconv.GroupName, name)
 }
 
 func (b *builder) ref(value string) *builder {
-	return b.attrString(attributeRef, value)
+	return b.attrString(semconv.Ref, value)
 }
 
 func (b *builder) sha(value string) *builder {
-	return b.attrString(attributeSHA, value)
+	return b.attrString(semconv.SHA, value)
 }
 
 func (b *builder) action(value string) *builder {
 	b.operation(value)
-	return b.attrString(attributeAction, value)
+	return b.attrString(semconv.WebhookAction, value)
 }
 
 func (b *builder) status(value string) *builder {
 	b.operation(value)
-	return b.attrString(attributeStatus, value)
+	return b.attrString(semconv.WebhookStatus, value)
 }
 
 func (b *builder) note(noteableType, action string) *builder {
 	b.operation(noteableType)
 	b.operation(action)
-	return b.attrString(attributeNoteable, noteableType).attrString(attributeAction, action)
+	return b.attrString(semconv.NoteNoteableType, noteableType).attrString(semconv.WebhookAction, action)
 }
 
 func (b *builder) issue(iid int64, state string) *builder {
-	return b.attrInt64(attributeIssueIID, iid).attrString(attributeIssueState, state)
+	return b.attrInt64(semconv.IssueIID, iid).attrString(semconv.IssueState, state)
 }
 
 func (b *builder) job(id int64, name, stage string) *builder {
 	return b.
-		attrInt64(attributeJobID, id).
-		attrString(attributeJobName, name).
-		attrString(attributeJobStage, stage)
+		attrInt64(semconv.JobID, id).
+		attrString(semconv.JobName, name).
+		attrString(semconv.JobStage, stage)
 }
 
 func (b *builder) mergeRequest(iid int64, state string) *builder {
-	return b.attrInt64(attributeMergeIID, iid).attrString(attributeMergeState, state)
+	return b.attrInt64(semconv.MergeRequestIID, iid).attrString(semconv.MergeRequestState, state)
 }
 
 func (b *builder) pipeline(id, iid int64, source string) *builder {
 	return b.
-		attrInt64(attributePipelineID, id).
-		attrInt64(attributePipelineIID, iid).
-		attrString(attributePipelineSrc, source)
+		attrInt64(semconv.PipelineID, id).
+		attrInt64(semconv.PipelineIID, iid).
+		attrString(semconv.PipelineSource, source)
 }
 
-func (b *builder) attrString(key, value string) *builder {
+func (b *builder) attrString(keyValue func(string) attribute.KeyValue, value string) *builder {
 	value = strings.TrimSpace(value)
 	if value != "" {
-		b.attrs = append(b.attrs, attribute.String(key, value))
+		b.attrs = append(b.attrs, keyValue(value))
 	}
 
 	return b
 }
 
-func (b *builder) attrInt64(key string, value int64) *builder {
+func (b *builder) attrInt64(keyValue func(int64) attribute.KeyValue, value int64) *builder {
 	if value != 0 {
-		b.attrs = append(b.attrs, attribute.Int64(key, value))
+		b.attrs = append(b.attrs, keyValue(value))
 	}
 
 	return b
 }
 
-func (b *builder) attrBool(key string, value bool) *builder {
-	b.attrs = append(b.attrs, attribute.Bool(key, value))
+func (b *builder) attrBool(keyValue func(bool) attribute.KeyValue, value bool) *builder {
+	b.attrs = append(b.attrs, keyValue(value))
 
 	return b
 }
@@ -395,7 +357,7 @@ func (b *builder) build() Metadata {
 func fallback(event any) Metadata {
 	b := newBuilder("unknown")
 	if event != nil {
-		b.attrString(attributeGoType, goTypeName(event))
+		b.attrString(semconv.WebhookGoType, goTypeName(event))
 	}
 
 	return b.build()
