@@ -90,7 +90,7 @@ func main() {
 		gitlabwebhook.WithMiddlewares(
 			loggingMiddleware,
 			// Only runs for push events.
-			gitlabwebhook.ForEvent(func(ctx context.Context, event *gitlab.PushEvent) error {
+			gitlabwebhook.MiddlewareForEvent(func(ctx context.Context, event *gitlab.PushEvent) error {
 				log.Printf("push event: %s", event.Project.PathWithNamespace)
 				return nil
 			}),

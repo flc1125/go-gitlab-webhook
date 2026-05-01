@@ -440,7 +440,7 @@ func TestDispatcher_Middleware(t *testing.T) {
 	t.Run("for event runs only for matching events", func(t *testing.T) {
 		called := false
 		dispatcher := NewDispatcher(
-			WithMiddlewares(ForEvent(func(ctx context.Context, event *gitlab.PushEvent) error {
+			WithMiddlewares(MiddlewareForEvent(func(ctx context.Context, event *gitlab.PushEvent) error {
 				called = true
 				return nil
 			})),
@@ -469,7 +469,7 @@ func TestDispatcher_Middleware(t *testing.T) {
 
 		dispatcher := NewDispatcher(
 			RegisterListeners(listener),
-			WithMiddlewares(ForEvent(func(ctx context.Context, event *gitlab.PushEvent) error {
+			WithMiddlewares(MiddlewareForEvent(func(ctx context.Context, event *gitlab.PushEvent) error {
 				return expectedErr
 			})),
 		)

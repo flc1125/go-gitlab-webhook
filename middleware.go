@@ -13,11 +13,11 @@ type HandlerFunc func(ctx context.Context, event any) error
 // A middleware can stop dispatch by returning an error without calling next.
 type Middleware func(next HandlerFunc) HandlerFunc
 
-// ForEvent returns middleware that runs fn only for events assignable to E.
+// MiddlewareForEvent returns middleware that runs fn only for events assignable to E.
 //
 // If fn returns an error, dispatch stops and that error is returned. Events of
 // other types skip fn and continue to the next handler.
-func ForEvent[E any](fn func(context.Context, E) error) Middleware {
+func MiddlewareForEvent[E any](fn func(context.Context, E) error) Middleware {
 	return func(next HandlerFunc) HandlerFunc {
 		return func(ctx context.Context, event any) error {
 			e, ok := event.(E)
