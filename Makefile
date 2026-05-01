@@ -6,6 +6,7 @@ ROOT_GO_MOD_DIRS := $(filter-out $(TOOLS_MOD_DIR), $(ALL_GO_MOD_DIRS))
 ALL_COVERAGE_MOD_DIRS := $(shell find . -type f -name 'go.mod' -exec dirname {} \; | grep -E -v '^./example|^$(TOOLS_MOD_DIR)' | sort)
 
 GO = go
+GIT = git
 TIMEOUT = 60
 
 # Tools
@@ -117,6 +118,9 @@ lint-fix: go-mod-tidy golangci-lint-fix
 lint-fix/%: DIR=$*
 lint-fix/%: go-mod-tidy/% golangci-lint-fix/%
 	@echo "Lint fix complete"
+
+.PHONY: ci
+ci: lint build check-clean-work-tree
 
 .PHONY: check-clean-work-tree
 check-clean-work-tree:

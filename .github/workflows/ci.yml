@@ -1,4 +1,4 @@
-name: Go Lint
+name: CI
 
 on:
   push:
@@ -9,8 +9,8 @@ on:
       - 3.x
 
 jobs:
-  golangci:
-    name: lint
+  ci:
+    name: ci
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -29,11 +29,5 @@ jobs:
           path: .tools
           key: ${{ runner.os }}-${{ env.cache-name }}-${{ hashFiles('./internal/tools/**') }}
 
-      - name: Run lint
-        run: make lint
-
-      - name: Build
-        run: make build
-
-      - name: Check clean repository
-        run: make check-clean-work-tree
+      - name: Run CI checks
+        run: make ci
