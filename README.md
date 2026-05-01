@@ -40,6 +40,7 @@ package main
 
 import (
 	"context"
+	"log"
 	"net/http"
 
 	"github.com/flc1125/go-gitlab-webhook/v3"
@@ -86,6 +87,14 @@ func main() {
 			&testCommitCommentListener{},
 			&testBuildAndCommitCommentListener{},
 		),
+		gitlabwebhook.WithMiddlewares(
+			loggingMiddleware,
+			// Only runs for push events.
+			gitlabwebhook.MiddlewareForEvent(func(ctx context.Context, event *gitlab.PushEvent) error {
+				log.Printf("push event: %s", event.Project.PathWithNamespace)
+				return nil
+			}),
+		),
 	)
 
 	dispatcher.RegisterListeners(
@@ -108,6 +117,13 @@ func main() {
 
 	if err := http.ListenAndServe(":8080", nil); err != nil {
 		panic(err)
+	}
+}
+
+func loggingMiddleware(next gitlabwebhook.HandlerFunc) gitlabwebhook.HandlerFunc {
+	return func(ctx context.Context, event any) error {
+		log.Printf("received webhook event: %T", event)
+		return next(ctx, event)
 	}
 }
 ```

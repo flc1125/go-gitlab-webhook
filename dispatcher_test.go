@@ -3,6 +3,7 @@ package gitlabwebhook
 import (
 	"bytes"
 	"context"
+	"errors"
 	"log"
 	"net/http"
 	"net/http/httptest"
@@ -351,6 +352,142 @@ var _ PushListener = (*simpleTestListener)(nil)
 func (s *simpleTestListener) OnPush(ctx context.Context, event *gitlab.PushEvent) error {
 	s.called = true
 	return nil
+}
+
+type middlewareContextKey struct{}
+
+func TestDispatcher_Middleware(t *testing.T) {
+	t.Run("wraps listener dispatch", func(t *testing.T) {
+		order := make([]string, 0, 3)
+		listener := &middlewareTestListener{
+			onPush: func(ctx context.Context, event *gitlab.PushEvent) error {
+				order = append(order, "listener")
+				assert.Equal(t, "middleware", ctx.Value(middlewareContextKey{}))
+				return nil
+			},
+		}
+
+		dispatcher := NewDispatcher(
+			RegisterListeners(listener),
+			WithMiddlewares(func(next HandlerFunc) HandlerFunc {
+				return func(ctx context.Context, event any) error {
+					order = append(order, "middleware before")
+					ctx = context.WithValue(ctx, middlewareContextKey{}, "middleware")
+					err := next(ctx, event)
+					order = append(order, "middleware after")
+					return err
+				}
+			}),
+		)
+
+		err := dispatcher.Dispatch(t.Context(), &gitlab.PushEvent{})
+
+		assert.NoError(t, err)
+		assert.Equal(t, []string{"middleware before", "listener", "middleware after"}, order)
+	})
+
+	t.Run("uses registration order", func(t *testing.T) {
+		order := make([]string, 0, 4)
+		dispatcher := NewDispatcher()
+		dispatcher.Use(
+			func(next HandlerFunc) HandlerFunc {
+				return func(ctx context.Context, event any) error {
+					order = append(order, "first before")
+					err := next(ctx, event)
+					order = append(order, "first after")
+					return err
+				}
+			},
+			func(next HandlerFunc) HandlerFunc {
+				return func(ctx context.Context, event any) error {
+					order = append(order, "second before")
+					err := next(ctx, event)
+					order = append(order, "second after")
+					return err
+				}
+			},
+		)
+
+		err := dispatcher.Dispatch(t.Context(), &gitlab.PushEvent{})
+
+		assert.NoError(t, err)
+		assert.Equal(t, []string{"first before", "second before", "second after", "first after"}, order)
+	})
+
+	t.Run("can stop dispatch", func(t *testing.T) {
+		expectedErr := errors.New("stop dispatch")
+		listener := &middlewareTestListener{
+			onPush: func(ctx context.Context, event *gitlab.PushEvent) error {
+				t.Fatal("listener should not be called")
+				return nil
+			},
+		}
+
+		dispatcher := NewDispatcher(
+			RegisterListeners(listener),
+			WithMiddlewares(func(next HandlerFunc) HandlerFunc {
+				return func(ctx context.Context, event any) error {
+					return expectedErr
+				}
+			}),
+		)
+
+		err := dispatcher.Dispatch(t.Context(), &gitlab.PushEvent{})
+
+		assert.ErrorIs(t, err, expectedErr)
+	})
+
+	t.Run("for event runs only for matching events", func(t *testing.T) {
+		called := false
+		dispatcher := NewDispatcher(
+			WithMiddlewares(MiddlewareForEvent(func(ctx context.Context, event *gitlab.PushEvent) error {
+				called = true
+				return nil
+			})),
+		)
+
+		err := dispatcher.Dispatch(t.Context(), &gitlab.PushEvent{})
+
+		assert.NoError(t, err)
+		assert.True(t, called)
+
+		called = false
+		err = dispatcher.Dispatch(t.Context(), &gitlab.MergeEvent{})
+
+		assert.NoError(t, err)
+		assert.False(t, called)
+	})
+
+	t.Run("for event can stop dispatch", func(t *testing.T) {
+		expectedErr := errors.New("stop push")
+		listener := &middlewareTestListener{
+			onPush: func(ctx context.Context, event *gitlab.PushEvent) error {
+				t.Fatal("listener should not be called")
+				return nil
+			},
+		}
+
+		dispatcher := NewDispatcher(
+			RegisterListeners(listener),
+			WithMiddlewares(MiddlewareForEvent(func(ctx context.Context, event *gitlab.PushEvent) error {
+				return expectedErr
+			})),
+		)
+
+		err := dispatcher.Dispatch(t.Context(), &gitlab.PushEvent{})
+
+		assert.ErrorIs(t, err, expectedErr)
+	})
+}
+
+type middlewareTestListener struct {
+	onPush func(context.Context, *gitlab.PushEvent) error
+}
+
+var _ PushListener = (*middlewareTestListener)(nil)
+
+func (l *middlewareTestListener) OnPush(ctx context.Context, event *gitlab.PushEvent) error {
+	return l.onPush(ctx, event)
 }
 
 func loadFixture(filePath string) []byte {
