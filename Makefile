@@ -106,11 +106,17 @@ go-mod-tidy/%:
 		&& cd $(DIR) \
 		&& $(GO) mod tidy -compat=1.22.0
 
-.PHONY: lint-modules
-lint-modules: go-mod-tidy
-
 .PHONY: lint
-lint: lint-modules golangci-lint
+lint: go-mod-tidy golangci-lint
+lint/%: DIR=$*
+lint/%: go-mod-tidy/% golangci-lint/%
+	@echo "Linting complete"
+
+.PHONY: lint-fix
+lint-fix: go-mod-tidy golangci-lint-fix
+lint-fix/%: DIR=$*
+lint-fix/%: go-mod-tidy/% golangci-lint-fix/%
+	@echo "Lint fix complete"
 
 .PHONY: check-clean-work-tree
 check-clean-work-tree:

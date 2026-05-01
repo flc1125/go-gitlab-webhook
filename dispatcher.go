@@ -6,6 +6,7 @@ import (
 	"errors"
 	"io"
 	"net/http"
+	"slices"
 	"sync"
 
 	gitlab "gitlab.com/gitlab-org/api/client-go/v2"
@@ -250,8 +251,8 @@ func (d *Dispatcher) RegisterWikiPageListener(listeners ...WikiPageListener) {
 func (d *Dispatcher) Dispatch(ctx context.Context, event any) error {
 	handler := d.dispatchEvent
 
-	for i := len(d.middlewares) - 1; i >= 0; i-- {
-		handler = d.middlewares[i](handler)
+	for _, mw := range slices.Backward(d.middlewares) {
+		handler = mw(handler)
 	}
 
 	return handler(ctx, event)
@@ -456,7 +457,7 @@ func (d *Dispatcher) processWikiPageEvent(ctx context.Context, event *gitlab.Wik
 	return processEvent(ctx, d.wikiPageListeners, WikiPageListener.OnWikiPage, event)
 }
 
-func processEvent[E any, L any](ctx context.Context, listeners []L, handler func(L, context.Context, E) error, event E) error {
+func processEvent[E, L any](ctx context.Context, listeners []L, handler func(L, context.Context, E) error, event E) error {
 	if len(listeners) == 0 {
 		return nil
 	}
