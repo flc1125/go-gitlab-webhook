@@ -436,6 +436,48 @@ func TestDispatcher_Middleware(t *testing.T) {
 
 		assert.ErrorIs(t, err, expectedErr)
 	})
+
+	t.Run("for event runs only for matching events", func(t *testing.T) {
+		called := false
+		dispatcher := NewDispatcher(
+			WithMiddlewares(ForEvent(func(ctx context.Context, event *gitlab.PushEvent) error {
+				called = true
+				return nil
+			})),
+		)
+
+		err := dispatcher.Dispatch(t.Context(), &gitlab.PushEvent{})
+
+		assert.NoError(t, err)
+		assert.True(t, called)
+
+		called = false
+		err = dispatcher.Dispatch(t.Context(), &gitlab.MergeEvent{})
+
+		assert.NoError(t, err)
+		assert.False(t, called)
+	})
+
+	t.Run("for event can stop dispatch", func(t *testing.T) {
+		expectedErr := errors.New("stop push")
+		listener := &middlewareTestListener{
+			onPush: func(ctx context.Context, event *gitlab.PushEvent) error {
+				t.Fatal("listener should not be called")
+				return nil
+			},
+		}
+
+		dispatcher := NewDispatcher(
+			RegisterListeners(listener),
+			WithMiddlewares(ForEvent(func(ctx context.Context, event *gitlab.PushEvent) error {
+				return expectedErr
+			})),
+		)
+
+		err := dispatcher.Dispatch(t.Context(), &gitlab.PushEvent{})
+
+		assert.ErrorIs(t, err, expectedErr)
+	})
 }
 
 type middlewareTestListener struct {
