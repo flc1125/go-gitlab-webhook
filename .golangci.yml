@@ -46,6 +46,10 @@ linters:
         - name: var-naming
           arguments: [ [ ],[ ],[ skipPackageNameChecks: true ] ]
         - name: waitgroup-by-value
+    gomoddirectives:
+      replace-local: true
+      replace-allow-list:
+        - github.com/flc1125/go-gitlab-webhook/v3
       toolchain-forbidden: true
       go-version-pattern: '^1\.25\.0$'
     nolintlint:
