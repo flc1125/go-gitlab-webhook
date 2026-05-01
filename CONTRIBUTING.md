@@ -62,7 +62,7 @@ Extend `dispatcher_test.go` to cover the new event. At minimum, tests should ver
 - the listener is actually invoked
 - key event fields are asserted as expected
 
-If there is no existing fixture for the event, add a minimal valid payload under `testdata/webhooks/`.
+If there is no existing fixture for the event, add a minimal valid payload under `internal/testdata/webhooks/`.
 
 ### 5. Scope of a typical event support change
 
