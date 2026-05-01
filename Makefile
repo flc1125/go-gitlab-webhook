@@ -105,7 +105,7 @@ go-mod-tidy/%: DIR=$*
 go-mod-tidy/%:
 	@echo "$(GO) mod tidy in $(DIR)" \
 		&& cd $(DIR) \
-		&& $(GO) mod tidy -compat=1.22.0
+		&& $(GO) mod tidy -compat=1.25.0
 
 .PHONY: lint
 lint: go-mod-tidy golangci-lint
@@ -126,7 +126,7 @@ ci: lint build check-clean-work-tree
 check-clean-work-tree:
 	@if ! git diff --quiet; then \
 	  echo; \
-	  echo 'Working tree is not clean, did you forget to run "make precommit"?'; \
+	  echo 'Working tree is not clean, did you forget to run "make ci"?'; \
 	  echo; \
 	  git status; \
 	  exit 1; \

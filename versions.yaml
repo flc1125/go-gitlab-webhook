@@ -1,11 +1,11 @@
 module-sets:
   stable:
-    version: v4.0.2
+    version: v3.0.2
     modules:
       # Core modules
-      - github.com/flc1125/go-gitlab-webhook/v4
+      - github.com/flc1125/go-gitlab-webhook/v3
 
       # Middleware modules
       # TODO: Add more middleware modules here when they are added to the project
 excluded-modules:
-  - github.com/flc1125/go-gitlab-webhook/internal/tools/v4
+  - github.com/flc1125/go-gitlab-webhook/internal/tools/v3
