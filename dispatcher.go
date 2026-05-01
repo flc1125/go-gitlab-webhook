@@ -40,13 +40,24 @@ type Dispatcher struct {
 	tagListeners                        []TagListener
 	vulnerabilityListeners              []VulnerabilityListener
 	wikiPageListeners                   []WikiPageListener
+	middlewares                         []Middleware
 }
 
 type Option func(*Dispatcher)
 
+type HandlerFunc func(ctx context.Context, event any) error
+
+type Middleware func(next HandlerFunc) HandlerFunc
+
 func RegisterListeners(listeners ...any) Option {
 	return func(d *Dispatcher) {
 		d.RegisterListeners(listeners...)
+	}
+}
+
+func WithMiddlewares(middlewares ...Middleware) Option {
+	return func(d *Dispatcher) {
+		d.Use(middlewares...)
 	}
 }
 
@@ -56,6 +67,10 @@ func NewDispatcher(opts ...Option) *Dispatcher {
 		opt(dispatcher)
 	}
 	return dispatcher
+}
+
+func (d *Dispatcher) Use(middlewares ...Middleware) {
+	d.middlewares = append(d.middlewares, middlewares...)
 }
 
 func (d *Dispatcher) RegisterListeners(listeners ...any) {
@@ -247,6 +262,16 @@ func (d *Dispatcher) RegisterWikiPageListener(listeners ...WikiPageListener) {
 }
 
 func (d *Dispatcher) Dispatch(ctx context.Context, event any) error {
+	handler := d.dispatchEvent
+
+	for i := len(d.middlewares) - 1; i >= 0; i-- {
+		handler = d.middlewares[i](handler)
+	}
+
+	return handler(ctx, event)
+}
+
+func (d *Dispatcher) dispatchEvent(ctx context.Context, event any) error {
 	switch e := event.(type) {
 	case *gitlab.BuildEvent:
 		return d.processBuildEvent(ctx, e)
