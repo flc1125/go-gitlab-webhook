@@ -1,6 +1,6 @@
 # GitLab Webhook OpenTelemetry Middleware
 
-OpenTelemetry tracing middleware for `github.com/flc1125/go-gitlab-webhook/v3`.
+OpenTelemetry tracing and metrics middleware for `github.com/flc1125/go-gitlab-webhook/v3`.
 
 ## Installation
 
@@ -51,14 +51,15 @@ func main() {
 
 ## Tracer Provider
 
-By default, the middleware uses the global OpenTelemetry tracer provider.
-Pass a provider explicitly when your application wires tracing without globals:
+By default, the middleware uses the global OpenTelemetry tracer and meter providers.
+Pass providers explicitly when your application wires telemetry without globals:
 
 ```go
 dispatcher := gitlabwebhook.NewDispatcher(
 	gitlabwebhook.WithMiddlewares(
 		otelmiddleware.Middleware(
 			otelmiddleware.WithTracerProvider(tracerProvider),
+			otelmiddleware.WithMeterProvider(meterProvider),
 		),
 	),
 )
@@ -87,3 +88,19 @@ Event details are recorded as attributes, for example:
 - `gitlab.project.path`
 - `gitlab.ref`
 - `gitlab.sha`
+
+## Metrics
+
+The middleware records basic event handling metrics:
+
+- `gitlab.webhook.events`: count of handled webhook events
+- `gitlab.webhook.event.duration`: event handling duration in seconds
+
+Metric attributes are intentionally low-cardinality:
+
+- `gitlab.webhook.event_type`
+- `gitlab.webhook.object_kind`
+- `gitlab.webhook.event_name`
+- `gitlab.webhook.action`
+- `gitlab.webhook.status`
+- `gitlab.webhook.result`

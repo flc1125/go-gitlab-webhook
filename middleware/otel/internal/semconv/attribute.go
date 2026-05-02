@@ -8,6 +8,7 @@ const (
 	WebhookEventNameKey  = attribute.Key("gitlab.webhook.event_name")
 	WebhookActionKey     = attribute.Key("gitlab.webhook.action")
 	WebhookStatusKey     = attribute.Key("gitlab.webhook.status")
+	WebhookResultKey     = attribute.Key("gitlab.webhook.result")
 	WebhookGoTypeKey     = attribute.Key("gitlab.webhook.go_type")
 
 	ProjectIDKey          = attribute.Key("gitlab.project.id")
@@ -82,6 +83,10 @@ func WebhookAction(val string) attribute.KeyValue {
 
 func WebhookStatus(val string) attribute.KeyValue {
 	return WebhookStatusKey.String(val)
+}
+
+func WebhookResult(val string) attribute.KeyValue {
+	return WebhookResultKey.String(val)
 }
 
 func WebhookGoType(val string) attribute.KeyValue {
