@@ -408,7 +408,7 @@ func readPayload(body io.Reader, maxBodyBytes int64) ([]byte, error) {
 
 	limit := maxBodyBytes + 1
 	if limit <= 0 {
-		limit = maxBodyBytes
+		return io.ReadAll(body)
 	}
 
 	payload, err := io.ReadAll(io.LimitReader(body, limit))

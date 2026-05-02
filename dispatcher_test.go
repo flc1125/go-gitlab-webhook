@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"math"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -432,6 +433,12 @@ func TestDispatcher_DispatchRequestWithMaxBodyBytes(t *testing.T) {
 			name:           "exact limit should dispatch successfully",
 			useLimit:       true,
 			maxBodyBytes:   int64(len(payload)),
+			shouldDispatch: true,
+		},
+		{
+			name:           "maximum limit should dispatch successfully",
+			useLimit:       true,
+			maxBodyBytes:   math.MaxInt64,
 			shouldDispatch: true,
 		},
 		{
