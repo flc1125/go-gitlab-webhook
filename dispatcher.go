@@ -13,8 +13,12 @@ import (
 )
 
 var (
+	// ErrUnsupportedEvent is returned when an event type has no registered dispatcher branch.
 	ErrUnsupportedEvent = errors.New("gitlab-webhook: unsupported event type")
-	ErrInvalidToken     = errors.New("gitlab-webhook: invalid token")
+	// ErrInvalidToken is returned when the GitLab token header does not match.
+	ErrInvalidToken = errors.New("gitlab-webhook: invalid token")
+	// ErrPayloadTooLarge is returned when a request body exceeds the configured limit.
+	ErrPayloadTooLarge = errors.New("gitlab-webhook: payload too large")
 )
 
 // Dispatcher routes parsed GitLab webhook events to registered listeners.
@@ -340,8 +344,9 @@ func (d *Dispatcher) DispatchWebhook(ctx context.Context, eventType gitlab.Event
 }
 
 type dispatchRequestOptions struct {
-	ctx   context.Context
-	token string
+	ctx          context.Context
+	token        string
+	maxBodyBytes int64
 }
 
 type DispatchRequestOption func(*dispatchRequestOptions)
@@ -355,6 +360,17 @@ func DispatchRequestWithContext(ctx context.Context) DispatchRequestOption {
 func DispatchRequestWithToken(token string) DispatchRequestOption {
 	return func(o *dispatchRequestOptions) {
 		o.token = token
+	}
+}
+
+// DispatchRequestWithMaxBodyBytes limits the number of request body bytes read.
+//
+// Values less than or equal to zero disable the limit and keep the default
+// behavior. When the body exceeds max bytes, DispatchRequest returns
+// ErrPayloadTooLarge before parsing or dispatching the webhook.
+func DispatchRequestWithMaxBodyBytes(max int64) DispatchRequestOption {
+	return func(o *dispatchRequestOptions) {
+		o.maxBodyBytes = max
 	}
 }
 
@@ -376,13 +392,34 @@ func (d *Dispatcher) DispatchRequest(req *http.Request, opts ...DispatchRequestO
 	}
 
 	// read payload
-	payload, err := io.ReadAll(req.Body)
+	payload, err := readPayload(req.Body, o.maxBodyBytes)
 	if err != nil {
 		return err
 	}
 
 	// dispatch webhook
 	return d.DispatchWebhook(o.ctx, gitlab.HookEventType(req), payload)
+}
+
+func readPayload(body io.Reader, maxBodyBytes int64) ([]byte, error) {
+	if maxBodyBytes <= 0 {
+		return io.ReadAll(body)
+	}
+
+	limit := maxBodyBytes + 1
+	if limit <= 0 {
+		limit = maxBodyBytes
+	}
+
+	payload, err := io.ReadAll(io.LimitReader(body, limit))
+	if err != nil {
+		return nil, err
+	}
+	if int64(len(payload)) > maxBodyBytes {
+		return nil, ErrPayloadTooLarge
+	}
+
+	return payload, nil
 }
 
 func (d *Dispatcher) processBuildEvent(ctx context.Context, event *gitlab.BuildEvent) error {

@@ -404,6 +404,69 @@ func TestDispatcher_DispatchRequestWithToken(t *testing.T) {
 	}
 }
 
+func TestDispatcher_DispatchRequestWithMaxBodyBytes(t *testing.T) {
+	payload := loadFixture(t, "webhooks/push.json")
+	simpleListener := &simpleTestListener{}
+	dispatcher := NewDispatcher(
+		RegisterListeners(simpleListener),
+	)
+
+	tests := []struct {
+		name           string
+		useLimit       bool
+		maxBodyBytes   int64
+		expectedError  error
+		shouldDispatch bool
+	}{
+		{
+			name:           "no limit option should dispatch successfully",
+			shouldDispatch: true,
+		},
+		{
+			name:           "zero limit should dispatch successfully",
+			useLimit:       true,
+			maxBodyBytes:   0,
+			shouldDispatch: true,
+		},
+		{
+			name:           "exact limit should dispatch successfully",
+			useLimit:       true,
+			maxBodyBytes:   int64(len(payload)),
+			shouldDispatch: true,
+		},
+		{
+			name:           "payload larger than limit should return ErrPayloadTooLarge",
+			useLimit:       true,
+			maxBodyBytes:   int64(len(payload) - 1),
+			expectedError:  ErrPayloadTooLarge,
+			shouldDispatch: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			req := httptest.NewRequest(http.MethodPost, "/webhook", bytes.NewReader(payload))
+			req.Header.Set("Content-Type", "application/json")
+			req.Header.Set("X-Gitlab-Event", string(gitlab.EventTypePush))
+
+			var opts []DispatchRequestOption
+			if tt.useLimit {
+				opts = append(opts, DispatchRequestWithMaxBodyBytes(tt.maxBodyBytes))
+			}
+
+			simpleListener.called = false
+			err := dispatcher.DispatchRequest(req, opts...)
+
+			if tt.expectedError != nil {
+				assert.ErrorIs(t, err, tt.expectedError)
+			} else {
+				assert.NoError(t, err)
+			}
+			assert.Equal(t, tt.shouldDispatch, simpleListener.called)
+		})
+	}
+}
+
 type simpleTestListener struct {
 	called bool
 }

@@ -107,6 +107,7 @@ func main() {
 		if err := dispatcher.DispatchRequest(r,
 			gitlabwebhook.DispatchRequestWithToken("your-secret-token"), // validate token, if needed
 			gitlabwebhook.DispatchRequestWithContext(context.Background()), // custom context
+			gitlabwebhook.DispatchRequestWithMaxBodyBytes(10<<20), // limit payload size to 10 MiB
 		); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -127,6 +128,10 @@ func loggingMiddleware(next gitlabwebhook.HandlerFunc) gitlabwebhook.HandlerFunc
 	}
 }
 ```
+
+## 🔐 Security Notes
+
+If your webhook endpoint is exposed publicly, limit request body size before parsing payloads. You can use `DispatchRequestWithMaxBodyBytes` when calling `DispatchRequest`, or enforce an equivalent limit in your HTTP server or reverse proxy.
 
 ## 📜 License
 
