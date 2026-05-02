@@ -209,7 +209,10 @@ func Extract(event any) Metadata { //nolint:cyclop
 	case *gitlab.WikiPageEvent:
 		return newBuilder("wiki_page").
 			objectKind(e.ObjectKind).
-			project(0, e.Project.PathWithNamespace, e.Project.Name).
+			attrs(
+				semconv.ProjectPath(e.Project.PathWithNamespace),
+				semconv.ProjectName(e.Project.Name),
+			).
 			action(e.ObjectAttributes.Action).
 			build()
 	default:

@@ -35,6 +35,9 @@ func newConfig(opts ...Option) *config {
 	}
 
 	for _, opt := range opts {
+		if opt == nil {
+			continue
+		}
 		opt.apply(cfg)
 	}
 

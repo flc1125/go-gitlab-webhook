@@ -75,6 +75,19 @@ func TestMiddlewareRecordsError(t *testing.T) {
 	assert.NotEmpty(t, span.Events)
 }
 
+func TestMiddlewareSkipsNilOption(t *testing.T) {
+	recorder := tracetest.NewSpanRecorder()
+	provider := sdktrace.NewTracerProvider(sdktrace.WithSpanProcessor(recorder))
+
+	handler := otel.Middleware(nil, otel.WithTracerProvider(provider))(func(context.Context, any) error {
+		return nil
+	})
+
+	err := handler(context.Background(), &gitlab.PushEvent{})
+	require.NoError(t, err)
+	assert.Len(t, recorder.Ended(), 1)
+}
+
 func attrString(attrs []attribute.KeyValue, key string) string {
 	for _, attr := range attrs {
 		if string(attr.Key) == key {

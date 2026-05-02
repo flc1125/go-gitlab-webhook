@@ -58,6 +58,24 @@ func TestExtractMergeEvent(t *testing.T) {
 	assert.Equal(t, "checking", attrString(metadata.Attributes, "gitlab.merge_request.detailed_merge_status"))
 }
 
+func TestExtractWikiPageEventDoesNotEmitUnknownProjectID(t *testing.T) {
+	metadata := eventmeta.Extract(&gitlab.WikiPageEvent{
+		ObjectKind: "wiki_page",
+		Project: gitlab.WikiPageEventProject{
+			Name:              "project",
+			PathWithNamespace: "group/project",
+		},
+		ObjectAttributes: gitlab.WikiPageEventObjectAttributes{
+			Action: "create",
+		},
+	})
+
+	assert.Equal(t, "gitlab.webhook.wiki_page create", metadata.SpanName)
+	assert.False(t, hasAttr(metadata.Attributes, "gitlab.project.id"))
+	assert.Equal(t, "group/project", attrString(metadata.Attributes, "gitlab.project.path"))
+	assert.Equal(t, "project", attrString(metadata.Attributes, "gitlab.project.name"))
+}
+
 func TestExtractUnknownEvent(t *testing.T) {
 	metadata := eventmeta.Extract(struct{}{})
 
