@@ -356,6 +356,42 @@ func (s *simpleTestListener) OnPush(ctx context.Context, event *gitlab.PushEvent
 	return nil
 }
 
+func TestDispatcher_RegisterBeforeDispatch(t *testing.T) {
+	calls := make(chan string, 2)
+	listenerA := buildTimeTestListener{name: "listenerA", calls: calls}
+	listenerB := buildTimeTestListener{name: "listenerB", calls: calls}
+	middlewareCalled := false
+
+	dispatcher := NewDispatcher(
+		RegisterListeners(listenerA),
+		WithMiddlewares(func(next HandlerFunc) HandlerFunc {
+			return func(ctx context.Context, event any) error {
+				middlewareCalled = true
+				return next(ctx, event)
+			}
+		}),
+	)
+	dispatcher.RegisterListeners(listenerB)
+
+	err := dispatcher.Dispatch(t.Context(), &gitlab.PushEvent{})
+
+	assert.NoError(t, err)
+	assert.True(t, middlewareCalled)
+	assert.ElementsMatch(t, []string{"listenerA", "listenerB"}, []string{<-calls, <-calls})
+}
+
+type buildTimeTestListener struct {
+	name  string
+	calls chan<- string
+}
+
+var _ PushListener = (*buildTimeTestListener)(nil)
+
+func (l buildTimeTestListener) OnPush(ctx context.Context, event *gitlab.PushEvent) error {
+	l.calls <- l.name
+	return nil
+}
+
 type middlewareContextKey struct{}
 
 func TestDispatcher_Middleware(t *testing.T) {

@@ -37,7 +37,9 @@ func MiddlewareForEvent[E any](fn func(context.Context, E) error) Middleware {
 // WithMiddlewares registers middleware during dispatcher construction.
 //
 // Middleware runs once per parsed webhook event, before the event is dispatched
-// to registered listeners.
+// to registered listeners. Register middleware before the dispatcher starts
+// handling events; concurrent middleware registration and dispatch is not
+// supported.
 func WithMiddlewares(middlewares ...Middleware) Option {
 	return func(d *Dispatcher) {
 		d.Use(middlewares...)
@@ -47,7 +49,9 @@ func WithMiddlewares(middlewares ...Middleware) Option {
 // Use appends middleware to the dispatcher.
 //
 // Middleware is applied in registration order: the first middleware wraps the
-// second, and so on, with listener dispatch as the final handler.
+// second, and so on, with listener dispatch as the final handler. Call Use
+// before the dispatcher starts handling events; concurrent middleware
+// registration and dispatch is not supported.
 func (d *Dispatcher) Use(middlewares ...Middleware) {
 	d.middlewares = append(d.middlewares, middlewares...)
 }

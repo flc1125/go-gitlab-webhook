@@ -17,6 +17,11 @@ var (
 	ErrInvalidToken     = errors.New("gitlab-webhook: invalid token")
 )
 
+// Dispatcher routes parsed GitLab webhook events to registered listeners.
+//
+// Configure a dispatcher before using it to handle events. Once dispatching
+// starts, it is safe to call Dispatch, DispatchWebhook, and DispatchRequest
+// concurrently, but listener and middleware registration must be complete.
 type Dispatcher struct {
 	buildListeners                      []BuildListener
 	commitCommentListeners              []CommitCommentListener
@@ -46,12 +51,22 @@ type Dispatcher struct {
 
 type Option func(*Dispatcher)
 
+// RegisterListeners registers listeners during dispatcher construction.
+//
+// Listener and middleware registration is intended to happen before the
+// dispatcher starts handling events. Do not call registration methods
+// concurrently with Dispatch, DispatchWebhook, or DispatchRequest.
 func RegisterListeners(listeners ...any) Option {
 	return func(d *Dispatcher) {
 		d.RegisterListeners(listeners...)
 	}
 }
 
+// NewDispatcher creates a dispatcher and applies its construction options.
+//
+// A Dispatcher is safe for concurrent dispatch after construction is complete.
+// Register all listeners and middleware before serving requests; mutating the
+// dispatcher while events are being dispatched is not supported.
 func NewDispatcher(opts ...Option) *Dispatcher {
 	dispatcher := &Dispatcher{}
 	for _, opt := range opts {
@@ -60,6 +75,11 @@ func NewDispatcher(opts ...Option) *Dispatcher {
 	return dispatcher
 }
 
+// RegisterListeners registers values that implement one or more listener interfaces.
+//
+// A listener can implement multiple listener interfaces and will be registered
+// for each matching event type. Call this method before the dispatcher starts
+// handling events; concurrent registration and dispatch is not supported.
 func (d *Dispatcher) RegisterListeners(listeners ...any) {
 	for _, listener := range listeners {
 		if l, ok := listener.(BuildListener); ok {
