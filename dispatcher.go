@@ -24,8 +24,9 @@ var (
 // Dispatcher routes parsed GitLab webhook events to registered listeners.
 //
 // Configure a dispatcher before using it to handle events. Once dispatching
-// starts, it is safe to call Dispatch, DispatchWebhook, and DispatchRequest
-// concurrently, but listener and middleware registration must be complete.
+// starts, it is safe to call [Dispatcher.Dispatch],
+// [Dispatcher.DispatchWebhook], and [Dispatcher.DispatchRequest] concurrently,
+// but listener and middleware registration must be complete.
 type Dispatcher struct {
 	buildListeners                      []BuildListener
 	commitCommentListeners              []CommitCommentListener
@@ -53,13 +54,15 @@ type Dispatcher struct {
 	middlewares                         []Middleware
 }
 
+// Option configures a [Dispatcher] during construction.
 type Option func(*Dispatcher)
 
 // RegisterListeners registers listeners during dispatcher construction.
 //
 // Listener and middleware registration is intended to happen before the
 // dispatcher starts handling events. Do not call registration methods
-// concurrently with Dispatch, DispatchWebhook, or DispatchRequest.
+// concurrently with [Dispatcher.Dispatch], [Dispatcher.DispatchWebhook], or
+// [Dispatcher.DispatchRequest].
 func RegisterListeners(listeners ...any) Option {
 	return func(d *Dispatcher) {
 		d.RegisterListeners(listeners...)
@@ -68,7 +71,7 @@ func RegisterListeners(listeners ...any) Option {
 
 // NewDispatcher creates a dispatcher and applies its construction options.
 //
-// A Dispatcher is safe for concurrent dispatch after construction is complete.
+// A [Dispatcher] is safe for concurrent dispatch after construction is complete.
 // Register all listeners and middleware before serving requests; mutating the
 // dispatcher while events are being dispatched is not supported.
 func NewDispatcher(opts ...Option) *Dispatcher {
@@ -180,98 +183,128 @@ func (d *Dispatcher) RegisterListeners(listeners ...any) {
 	}
 }
 
+// RegisterBuildListener registers listeners for build events.
 func (d *Dispatcher) RegisterBuildListener(listeners ...BuildListener) {
 	d.buildListeners = append(d.buildListeners, listeners...)
 }
 
+// RegisterCommitCommentListener registers listeners for commit comment events.
 func (d *Dispatcher) RegisterCommitCommentListener(listeners ...CommitCommentListener) {
 	d.commitCommentListeners = append(d.commitCommentListeners, listeners...)
 }
 
+// RegisterDeploymentListener registers listeners for deployment events.
 func (d *Dispatcher) RegisterDeploymentListener(listeners ...DeploymentListener) {
 	d.deploymentListeners = append(d.deploymentListeners, listeners...)
 }
 
+// RegisterEmojiListener registers listeners for emoji events.
 func (d *Dispatcher) RegisterEmojiListener(listeners ...EmojiListener) {
 	d.emojiListeners = append(d.emojiListeners, listeners...)
 }
 
+// RegisterFeatureFlagListener registers listeners for feature flag events.
 func (d *Dispatcher) RegisterFeatureFlagListener(listeners ...FeatureFlagListener) {
 	d.featureFlagListeners = append(d.featureFlagListeners, listeners...)
 }
 
+// RegisterGroupResourceAccessTokenListener registers listeners for group
+// resource access token events.
 func (d *Dispatcher) RegisterGroupResourceAccessTokenListener(listeners ...GroupResourceAccessTokenListener) {
 	d.groupResourceAccessTokenListeners = append(d.groupResourceAccessTokenListeners, listeners...)
 }
 
+// RegisterIssueCommentListener registers listeners for issue comment events.
 func (d *Dispatcher) RegisterIssueCommentListener(listeners ...IssueCommentListener) {
 	d.issueCommentListeners = append(d.issueCommentListeners, listeners...)
 }
 
+// RegisterIssueListener registers listeners for issue events.
 func (d *Dispatcher) RegisterIssueListener(listeners ...IssueListener) {
 	d.issueListeners = append(d.issueListeners, listeners...)
 }
 
+// RegisterJobListener registers listeners for job events.
 func (d *Dispatcher) RegisterJobListener(listeners ...JobListener) {
 	d.jobListeners = append(d.jobListeners, listeners...)
 }
 
+// RegisterMemberListener registers listeners for member events.
 func (d *Dispatcher) RegisterMemberListener(listeners ...MemberListener) {
 	d.memberListeners = append(d.memberListeners, listeners...)
 }
 
+// RegisterMilestoneListener registers listeners for milestone events.
 func (d *Dispatcher) RegisterMilestoneListener(listeners ...MilestoneListener) {
 	d.milestoneListeners = append(d.milestoneListeners, listeners...)
 }
 
+// RegisterMergeCommentListener registers listeners for merge request comment events.
 func (d *Dispatcher) RegisterMergeCommentListener(listeners ...MergeCommentListener) {
 	d.mergeCommentListeners = append(d.mergeCommentListeners, listeners...)
 }
 
+// RegisterMergeListener registers listeners for merge request events.
 func (d *Dispatcher) RegisterMergeListener(listeners ...MergeListener) {
 	d.mergeListeners = append(d.mergeListeners, listeners...)
 }
 
+// RegisterPipelineListener registers listeners for pipeline events.
 func (d *Dispatcher) RegisterPipelineListener(listeners ...PipelineListener) {
 	d.pipelineListeners = append(d.pipelineListeners, listeners...)
 }
 
+// RegisterProjectListener registers listeners for project events.
 func (d *Dispatcher) RegisterProjectListener(listeners ...ProjectListener) {
 	d.projectListeners = append(d.projectListeners, listeners...)
 }
 
+// RegisterProjectResourceAccessTokenListener registers listeners for project
+// resource access token events.
 func (d *Dispatcher) RegisterProjectResourceAccessTokenListener(listeners ...ProjectResourceAccessTokenListener) {
 	d.projectResourceAccessTokenListeners = append(d.projectResourceAccessTokenListeners, listeners...)
 }
 
+// RegisterPushListener registers listeners for push events.
 func (d *Dispatcher) RegisterPushListener(listeners ...PushListener) {
 	d.pushListeners = append(d.pushListeners, listeners...)
 }
 
+// RegisterReleaseListener registers listeners for release events.
 func (d *Dispatcher) RegisterReleaseListener(listeners ...ReleaseListener) {
 	d.releaseListeners = append(d.releaseListeners, listeners...)
 }
 
+// RegisterSnippetCommentListener registers listeners for snippet comment events.
 func (d *Dispatcher) RegisterSnippetCommentListener(listeners ...SnippetCommentListener) {
 	d.snippetCommentListeners = append(d.snippetCommentListeners, listeners...)
 }
 
+// RegisterSubGroupListener registers listeners for subgroup events.
 func (d *Dispatcher) RegisterSubGroupListener(listeners ...SubGroupListener) {
 	d.subGroupListeners = append(d.subGroupListeners, listeners...)
 }
 
+// RegisterTagListener registers listeners for tag push events.
 func (d *Dispatcher) RegisterTagListener(listeners ...TagListener) {
 	d.tagListeners = append(d.tagListeners, listeners...)
 }
 
+// RegisterVulnerabilityListener registers listeners for vulnerability events.
 func (d *Dispatcher) RegisterVulnerabilityListener(listeners ...VulnerabilityListener) {
 	d.vulnerabilityListeners = append(d.vulnerabilityListeners, listeners...)
 }
 
+// RegisterWikiPageListener registers listeners for wiki page events.
 func (d *Dispatcher) RegisterWikiPageListener(listeners ...WikiPageListener) {
 	d.wikiPageListeners = append(d.wikiPageListeners, listeners...)
 }
 
+// Dispatch sends an already parsed GitLab webhook event to registered listeners.
+//
+// Registered [Middleware] runs before listener dispatch. Dispatch returns
+// [ErrUnsupportedEvent] when event is not one of the supported GitLab webhook
+// event pointer types.
 func (d *Dispatcher) Dispatch(ctx context.Context, event any) error {
 	handler := d.dispatchEvent
 
@@ -335,6 +368,11 @@ func (d *Dispatcher) dispatchEvent(ctx context.Context, event any) error {
 	}
 }
 
+// DispatchWebhook parses a GitLab webhook payload and dispatches the parsed event.
+//
+// eventType selects the GitLab webhook parser branch. Parse errors are returned
+// before middleware or listeners run. Parsed events are dispatched through
+// [Dispatcher.Dispatch].
 func (d *Dispatcher) DispatchWebhook(ctx context.Context, eventType gitlab.EventType, payload []byte) error {
 	event, err := gitlab.ParseWebhook(eventType, payload)
 	if err != nil {
@@ -349,14 +387,22 @@ type dispatchRequestOptions struct {
 	maxBodyBytes int64
 }
 
+// DispatchRequestOption configures [Dispatcher.DispatchRequest].
 type DispatchRequestOption func(*dispatchRequestOptions)
 
+// DispatchRequestWithContext sets the context used for webhook dispatch.
+//
+// By default, [Dispatcher.DispatchRequest] uses [http.Request.Context].
 func DispatchRequestWithContext(ctx context.Context) DispatchRequestOption {
 	return func(o *dispatchRequestOptions) {
 		o.ctx = ctx
 	}
 }
 
+// DispatchRequestWithToken requires the GitLab token header to match token.
+//
+// When token is non-empty, [Dispatcher.DispatchRequest] compares it with the
+// X-Gitlab-Token request header and returns [ErrInvalidToken] on mismatch.
 func DispatchRequestWithToken(token string) DispatchRequestOption {
 	return func(o *dispatchRequestOptions) {
 		o.token = token
@@ -366,14 +412,20 @@ func DispatchRequestWithToken(token string) DispatchRequestOption {
 // DispatchRequestWithMaxBodyBytes limits the number of request body bytes read.
 //
 // Values less than or equal to zero disable the limit and keep the default
-// behavior. When the body exceeds max bytes, DispatchRequest returns
-// ErrPayloadTooLarge before parsing or dispatching the webhook.
+// behavior. When the body exceeds max bytes, [Dispatcher.DispatchRequest]
+// returns [ErrPayloadTooLarge] before parsing or dispatching the webhook.
 func DispatchRequestWithMaxBodyBytes(max int64) DispatchRequestOption {
 	return func(o *dispatchRequestOptions) {
 		o.maxBodyBytes = max
 	}
 }
 
+// DispatchRequest validates and dispatches an HTTP GitLab webhook [http.Request].
+//
+// The event type is read from the X-Gitlab-Event request header. If a token is
+// configured, the X-Gitlab-Token header is validated before the request body is
+// read. Body read errors, payload size errors, parse errors, and dispatch errors
+// are returned to the caller.
 func (d *Dispatcher) DispatchRequest(req *http.Request, opts ...DispatchRequestOption) error {
 	o := &dispatchRequestOptions{
 		ctx: req.Context(),
