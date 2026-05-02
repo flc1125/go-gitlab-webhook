@@ -49,7 +49,7 @@ func main() {
 }
 ```
 
-## Tracer Provider
+## Provider
 
 By default, the middleware uses the global OpenTelemetry tracer and meter providers.
 Pass providers explicitly when your application wires telemetry without globals:
@@ -94,6 +94,7 @@ Event details are recorded as attributes, for example:
 The middleware records basic event handling metrics:
 
 - `gitlab.webhook.events`: count of handled webhook events
+- `gitlab.webhook.active_events`: number of webhook events currently being handled
 - `gitlab.webhook.event.duration`: event handling duration in seconds
 
 Metric attributes are intentionally low-cardinality:
@@ -104,3 +105,5 @@ Metric attributes are intentionally low-cardinality:
 - `gitlab.webhook.action`
 - `gitlab.webhook.status`
 - `gitlab.webhook.result`
+
+`gitlab.webhook.result` is only recorded on completed event metrics.

@@ -26,8 +26,11 @@ func Middleware(opts ...Option) gitlabwebhook.Middleware {
 
 	return func(next gitlabwebhook.HandlerFunc) gitlabwebhook.HandlerFunc {
 		return func(ctx context.Context, event any) error {
-			metadata := eventmeta.Extract(event)
 			start := time.Now()
+			metadata := eventmeta.Extract(event)
+			metricRecorder.RecordActive(ctx, metadata, 1)
+			defer metricRecorder.RecordActive(ctx, metadata, -1)
+
 			ctx, span := tracer.Start(ctx,
 				metadata.SpanName,
 				trace.WithAttributes(metadata.Attributes...),

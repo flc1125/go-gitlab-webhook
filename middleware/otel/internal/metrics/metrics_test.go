@@ -29,7 +29,9 @@ func TestRecord(t *testing.T) {
 		},
 	}
 
+	recorder.RecordActive(context.Background(), metadata, 1)
 	recorder.Record(context.Background(), metadata, time.Second, nil)
+	recorder.RecordActive(context.Background(), metadata, -1)
 
 	rm := collectMetrics(t, reader)
 	events := metricByName(t, rm, "gitlab.webhook.events")
@@ -48,6 +50,14 @@ func TestRecord(t *testing.T) {
 	require.True(t, ok)
 	require.Len(t, histogram.DataPoints, 1)
 	assert.Equal(t, uint64(1), histogram.DataPoints[0].Count)
+
+	active := metricByName(t, rm, "gitlab.webhook.active_events")
+	activeSum, ok := active.Data.(metricdata.Sum[int64])
+	require.True(t, ok)
+	require.Len(t, activeSum.DataPoints, 1)
+	assert.Equal(t, int64(0), activeSum.DataPoints[0].Value)
+	assertAttrString(t, activeSum.DataPoints[0].Attributes, "gitlab.webhook.event_type", "push")
+	assertNoAttr(t, activeSum.DataPoints[0].Attributes, "gitlab.webhook.result")
 }
 
 func collectMetrics(t *testing.T, reader *sdkmetric.ManualReader) metricdata.ResourceMetrics {

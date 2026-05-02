@@ -19,6 +19,7 @@ const (
 // Metrics records GitLab webhook event metrics.
 type Metrics struct {
 	events   metric.Int64Counter
+	active   metric.Int64UpDownCounter
 	duration metric.Float64Histogram
 }
 
@@ -38,6 +39,15 @@ func New(provider metric.MeterProvider, instrumentationName, instrumentationVers
 		events = noop.Int64Counter{}
 	}
 
+	active, err := meter.Int64UpDownCounter(
+		"gitlab.webhook.active_events",
+		metric.WithDescription("Number of GitLab webhook events currently being handled."),
+		metric.WithUnit("{event}"),
+	)
+	if err != nil {
+		active = noop.Int64UpDownCounter{}
+	}
+
 	duration, err := meter.Float64Histogram(
 		"gitlab.webhook.event.duration",
 		metric.WithDescription("Duration of GitLab webhook event handling."),
@@ -49,8 +59,14 @@ func New(provider metric.MeterProvider, instrumentationName, instrumentationVers
 
 	return Metrics{
 		events:   events,
+		active:   active,
 		duration: duration,
 	}
+}
+
+// RecordActive records the current number of webhook events being handled.
+func (m Metrics) RecordActive(ctx context.Context, metadata eventmeta.Metadata, delta int64) {
+	m.active.Add(ctx, delta, metric.WithAttributes(metricAttributes(metadata.Attributes)...))
 }
 
 // Record records the handling result and duration for a webhook event.
