@@ -11,7 +11,7 @@ type config struct {
 	meterProvider  metric.MeterProvider
 }
 
-// Option configures the OpenTelemetry middleware.
+// Option configures [Middleware].
 //
 // Nil options are ignored.
 type Option interface {
@@ -26,7 +26,7 @@ func (fn optionFunc) apply(cfg *config) {
 
 // WithTracerProvider configures the tracer provider used by the middleware.
 //
-// If provider is nil, the middleware keeps using the global OpenTelemetry
+// If provider is nil, [Middleware] keeps using the global OpenTelemetry
 // tracer provider.
 func WithTracerProvider(provider trace.TracerProvider) Option {
 	return optionFunc(func(c *config) {
@@ -38,8 +38,8 @@ func WithTracerProvider(provider trace.TracerProvider) Option {
 
 // WithMeterProvider configures the meter provider used by the middleware.
 //
-// If provider is nil, the middleware keeps using the global OpenTelemetry
-// meter provider.
+// If provider is nil, [Middleware] keeps using the global OpenTelemetry meter
+// provider.
 func WithMeterProvider(provider metric.MeterProvider) Option {
 	return optionFunc(func(c *config) {
 		if provider != nil {

@@ -15,7 +15,8 @@ const (
 	instrumentationName = "github.com/flc1125/go-gitlab-webhook/middleware/otel/v3"
 )
 
-// Middleware returns middleware that traces and records metrics for webhook event dispatch.
+// Middleware returns a [gitlabwebhook.Middleware] that traces and records
+// metrics for webhook event dispatch.
 //
 // The middleware creates a span for each dispatched event, records errors on the
 // span, and records event metrics with the configured meter provider.
