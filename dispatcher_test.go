@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
-	"log"
+	"math"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -12,6 +12,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	gitlab "gitlab.com/gitlab-org/api/client-go/v2"
 )
 
@@ -32,19 +33,6 @@ func TestDispatcher_Dispatch(t *testing.T) {
 		RegisterListeners(&testListener{t: t}),
 	)
 	dispatcher.RegisterListeners(&testListener{t: t})
-
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		assert.Equal(t, http.MethodPost, r.Method)
-		assert.Equal(t, "/webhook", r.URL.Path)
-		assert.NoError(t,
-			dispatcher.DispatchRequest(r,
-				DispatchRequestWithContext(newDispatcherContext(r.Context())),
-			),
-		)
-
-		_, _ = w.Write([]byte(`{"status":"ok"}`))
-	}))
-	defer srv.Close()
 
 	tests := []struct {
 		name      string
@@ -78,22 +66,95 @@ func TestDispatcher_Dispatch(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			req, err := http.NewRequest(http.MethodPost, srv.URL+"/webhook", bytes.NewReader(loadFixture(tt.filepath)))
-			assert.NoError(t, err)
+			req := httptest.NewRequest(http.MethodPost, "/webhook", bytes.NewReader(loadFixture(t, tt.filepath)))
 			req.Header.Set("Content-Type", "application/json")
 			req.Header.Set("X-Gitlab-Event", string(tt.eventType))
 
-			resp, err := http.DefaultClient.Do(req)
+			err := dispatcher.DispatchRequest(req,
+				DispatchRequestWithContext(newDispatcherContext(req.Context())),
+			)
+
 			assert.NoError(t, err)
-			defer resp.Body.Close() //nolint:errcheck
-
-			assert.Equal(t, http.StatusOK, resp.StatusCode)
-
-			var buf bytes.Buffer
-			_, _ = buf.ReadFrom(resp.Body)
-			assert.Equal(t, `{"status":"ok"}`, buf.String())
 		})
 	}
+}
+
+func TestDispatcher_DispatchRequestHTTPServerSmoke(t *testing.T) {
+	dispatcher := NewDispatcher(RegisterListeners(&testListener{t: t}))
+
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		assert.Equal(t, http.MethodPost, r.Method)
+		assert.Equal(t, "/webhook", r.URL.Path)
+		assert.NoError(t,
+			dispatcher.DispatchRequest(r,
+				DispatchRequestWithContext(newDispatcherContext(r.Context())),
+			),
+		)
+
+		_, _ = w.Write([]byte(`{"status":"ok"}`))
+	}))
+	defer srv.Close()
+
+	req, err := http.NewRequest(http.MethodPost, srv.URL+"/webhook", bytes.NewReader(loadFixture(t, "webhooks/push.json")))
+	require.NoError(t, err)
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("X-Gitlab-Event", string(gitlab.EventTypePush))
+
+	resp, err := http.DefaultClient.Do(req)
+	require.NoError(t, err)
+	defer resp.Body.Close() //nolint:errcheck
+
+	assert.Equal(t, http.StatusOK, resp.StatusCode)
+
+	var buf bytes.Buffer
+	_, _ = buf.ReadFrom(resp.Body)
+	assert.Equal(t, `{"status":"ok"}`, buf.String())
+}
+
+func TestDispatcher_DispatchRequestErrors(t *testing.T) {
+	t.Run("invalid event type", func(t *testing.T) {
+		req := httptest.NewRequest(http.MethodPost, "/webhook", bytes.NewReader([]byte(`{}`)))
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("X-Gitlab-Event", "Unknown Hook")
+
+		err := NewDispatcher().DispatchRequest(req)
+
+		assert.Error(t, err)
+	})
+
+	t.Run("parse failure", func(t *testing.T) {
+		req := httptest.NewRequest(http.MethodPost, "/webhook", bytes.NewReader([]byte(`{"invalid"`)))
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("X-Gitlab-Event", string(gitlab.EventTypePush))
+
+		err := NewDispatcher().DispatchRequest(req)
+
+		assert.Error(t, err)
+	})
+
+	t.Run("body read failure", func(t *testing.T) {
+		expectedErr := errors.New("read failed")
+		req := httptest.NewRequest(http.MethodPost, "/webhook", nil)
+		req.Body = failingReadCloser{err: expectedErr}
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("X-Gitlab-Event", string(gitlab.EventTypePush))
+
+		err := NewDispatcher().DispatchRequest(req)
+
+		assert.ErrorIs(t, err, expectedErr)
+	})
+}
+
+type failingReadCloser struct {
+	err error
+}
+
+func (r failingReadCloser) Read(p []byte) (int, error) {
+	return 0, r.err
+}
+
+func (r failingReadCloser) Close() error {
+	return nil
 }
 
 type testListener struct {
@@ -314,8 +375,7 @@ func TestDispatcher_DispatchRequestWithToken(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			req, err := http.NewRequest(http.MethodPost, "/webhook", bytes.NewReader(loadFixture("webhooks/push.json")))
-			assert.NoError(t, err)
+			req := httptest.NewRequest(http.MethodPost, "/webhook", bytes.NewReader(loadFixture(t, "webhooks/push.json")))
 			req.Header.Set("Content-Type", "application/json")
 			req.Header.Set("X-Gitlab-Event", string(gitlab.EventTypePush))
 
@@ -331,7 +391,7 @@ func TestDispatcher_DispatchRequestWithToken(t *testing.T) {
 			// Reset listener call count
 			simpleListener.called = false
 
-			err = dispatcher.DispatchRequest(req, opts...)
+			err := dispatcher.DispatchRequest(req, opts...)
 
 			if tt.expectedError != nil {
 				assert.Error(t, err)
@@ -345,6 +405,75 @@ func TestDispatcher_DispatchRequestWithToken(t *testing.T) {
 	}
 }
 
+func TestDispatcher_DispatchRequestWithMaxBodyBytes(t *testing.T) {
+	payload := loadFixture(t, "webhooks/push.json")
+	simpleListener := &simpleTestListener{}
+	dispatcher := NewDispatcher(
+		RegisterListeners(simpleListener),
+	)
+
+	tests := []struct {
+		name           string
+		useLimit       bool
+		maxBodyBytes   int64
+		expectedError  error
+		shouldDispatch bool
+	}{
+		{
+			name:           "no limit option should dispatch successfully",
+			shouldDispatch: true,
+		},
+		{
+			name:           "zero limit should dispatch successfully",
+			useLimit:       true,
+			maxBodyBytes:   0,
+			shouldDispatch: true,
+		},
+		{
+			name:           "exact limit should dispatch successfully",
+			useLimit:       true,
+			maxBodyBytes:   int64(len(payload)),
+			shouldDispatch: true,
+		},
+		{
+			name:           "maximum limit should dispatch successfully",
+			useLimit:       true,
+			maxBodyBytes:   math.MaxInt64,
+			shouldDispatch: true,
+		},
+		{
+			name:           "payload larger than limit should return ErrPayloadTooLarge",
+			useLimit:       true,
+			maxBodyBytes:   int64(len(payload) - 1),
+			expectedError:  ErrPayloadTooLarge,
+			shouldDispatch: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			req := httptest.NewRequest(http.MethodPost, "/webhook", bytes.NewReader(payload))
+			req.Header.Set("Content-Type", "application/json")
+			req.Header.Set("X-Gitlab-Event", string(gitlab.EventTypePush))
+
+			var opts []DispatchRequestOption
+			if tt.useLimit {
+				opts = append(opts, DispatchRequestWithMaxBodyBytes(tt.maxBodyBytes))
+			}
+
+			simpleListener.called = false
+			err := dispatcher.DispatchRequest(req, opts...)
+
+			if tt.expectedError != nil {
+				assert.ErrorIs(t, err, tt.expectedError)
+			} else {
+				assert.NoError(t, err)
+			}
+			assert.Equal(t, tt.shouldDispatch, simpleListener.called)
+		})
+	}
+}
+
 type simpleTestListener struct {
 	called bool
 }
@@ -353,6 +482,42 @@ var _ PushListener = (*simpleTestListener)(nil)
 
 func (s *simpleTestListener) OnPush(ctx context.Context, event *gitlab.PushEvent) error {
 	s.called = true
+	return nil
+}
+
+func TestDispatcher_RegisterBeforeDispatch(t *testing.T) {
+	calls := make(chan string, 2)
+	listenerA := buildTimeTestListener{name: "listenerA", calls: calls}
+	listenerB := buildTimeTestListener{name: "listenerB", calls: calls}
+	middlewareCalled := false
+
+	dispatcher := NewDispatcher(
+		RegisterListeners(listenerA),
+		WithMiddlewares(func(next HandlerFunc) HandlerFunc {
+			return func(ctx context.Context, event any) error {
+				middlewareCalled = true
+				return next(ctx, event)
+			}
+		}),
+	)
+	dispatcher.RegisterListeners(listenerB)
+
+	err := dispatcher.Dispatch(t.Context(), &gitlab.PushEvent{})
+
+	assert.NoError(t, err)
+	assert.True(t, middlewareCalled)
+	assert.ElementsMatch(t, []string{"listenerA", "listenerB"}, []string{<-calls, <-calls})
+}
+
+type buildTimeTestListener struct {
+	name  string
+	calls chan<- string
+}
+
+var _ PushListener = (*buildTimeTestListener)(nil)
+
+func (l buildTimeTestListener) OnPush(ctx context.Context, event *gitlab.PushEvent) error {
+	l.calls <- l.name
 	return nil
 }
 
@@ -492,11 +657,11 @@ func (l *middlewareTestListener) OnPush(ctx context.Context, event *gitlab.PushE
 	return l.onPush(ctx, event)
 }
 
-func loadFixture(filePath string) []byte {
+func loadFixture(t testing.TB, filePath string) []byte {
+	t.Helper()
+
 	content, err := os.ReadFile(filepath.Join("internal", "testdata", filePath))
-	if err != nil {
-		log.Fatal(err)
-	}
+	require.NoError(t, err)
 
 	return content
 }
