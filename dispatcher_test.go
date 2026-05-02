@@ -55,10 +55,11 @@ func TestDispatcher_Dispatch(t *testing.T) {
 		{"commit comment", gitlab.EventTypeNote, "webhooks/note_commit.json"},  //nolint:lll
 		{"deployment", gitlab.EventTypeDeployment, "webhooks/deployment.json"}, //nolint:lll
 		{"emoji", gitlab.EventTypeEmoji, "webhooks/emoji.json"},
-		{"feature flag", gitlab.EventTypeFeatureFlag, "webhooks/feature_flag.json"},                                       //nolint:lll
-		{"group resource access token", gitlab.EventTypeResourceAccessToken, "webhooks/resource_access_token_group.json"}, //nolint:lll
-		{"issue comment", gitlab.EventTypeNote, "webhooks/note_issue.json"},                                               //nolint:lll
-		{"issue", gitlab.EventTypeIssue, "webhooks/issue.json"},                                                           //nolint:lll
+		{"feature flag", gitlab.EventTypeFeatureFlag, "webhooks/feature_flag.json"},                                           //nolint:lll
+		{"group resource access token", gitlab.EventTypeResourceAccessToken, "webhooks/resource_access_token_group.json"},     //nolint:lll
+		{"project resource access token", gitlab.EventTypeResourceAccessToken, "webhooks/resource_access_token_project.json"}, //nolint:lll
+		{"issue comment", gitlab.EventTypeNote, "webhooks/note_issue.json"},                                                   //nolint:lll
+		{"issue", gitlab.EventTypeIssue, "webhooks/issue.json"},                                                               //nolint:lll
 		{"job", gitlab.EventTypeJob, "webhooks/job.json"},
 		{"member", gitlab.EventTypeMember, "webhooks/member.json"},
 		{"milestone", gitlab.EventTypeMilestone, "webhooks/milestone.json"},

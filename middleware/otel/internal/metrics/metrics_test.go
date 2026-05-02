@@ -2,6 +2,7 @@ package metrics_test
 
 import (
 	"context"
+	"errors"
 	"testing"
 	"time"
 
@@ -58,6 +59,39 @@ func TestRecord(t *testing.T) {
 	assert.Equal(t, int64(0), activeSum.DataPoints[0].Value)
 	assertAttrString(t, activeSum.DataPoints[0].Attributes, "gitlab.webhook.event_type", "push")
 	assertNoAttr(t, activeSum.DataPoints[0].Attributes, "gitlab.webhook.result")
+}
+
+func TestRecordError(t *testing.T) {
+	reader := sdkmetric.NewManualReader()
+	provider := sdkmetric.NewMeterProvider(sdkmetric.WithReader(reader))
+	recorder := metrics.New(provider, "test/instrumentation", "v0.0.0")
+	metadata := eventmeta.Metadata{
+		SpanName: "gitlab.webhook.merge_request close",
+		Attributes: []attribute.KeyValue{
+			semconv.WebhookEventType("merge_request"),
+			semconv.WebhookAction("close"),
+			semconv.ProjectPath("group/project"),
+		},
+	}
+
+	recorder.Record(context.Background(), metadata, 250*time.Millisecond, errors.New("listener failed"))
+
+	rm := collectMetrics(t, reader)
+	events := metricByName(t, rm, "gitlab.webhook.events")
+	eventSum, ok := events.Data.(metricdata.Sum[int64])
+	require.True(t, ok)
+	require.Len(t, eventSum.DataPoints, 1)
+	assert.Equal(t, int64(1), eventSum.DataPoints[0].Value)
+	assertAttrString(t, eventSum.DataPoints[0].Attributes, "gitlab.webhook.event_type", "merge_request")
+	assertAttrString(t, eventSum.DataPoints[0].Attributes, "gitlab.webhook.action", "close")
+	assertAttrString(t, eventSum.DataPoints[0].Attributes, "gitlab.webhook.result", "error")
+	assertNoAttr(t, eventSum.DataPoints[0].Attributes, "gitlab.project.path")
+
+	duration := metricByName(t, rm, "gitlab.webhook.event.duration")
+	histogram, ok := duration.Data.(metricdata.Histogram[float64])
+	require.True(t, ok)
+	require.Len(t, histogram.DataPoints, 1)
+	assert.Equal(t, uint64(1), histogram.DataPoints[0].Count)
 }
 
 func collectMetrics(t *testing.T, reader *sdkmetric.ManualReader) metricdata.ResourceMetrics {
