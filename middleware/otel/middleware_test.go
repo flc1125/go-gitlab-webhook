@@ -11,6 +11,8 @@ import (
 	gitlab "gitlab.com/gitlab-org/api/client-go/v2"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
+	sdkmetric "go.opentelemetry.io/otel/sdk/metric"
+	"go.opentelemetry.io/otel/sdk/metric/metricdata"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"go.opentelemetry.io/otel/sdk/trace/tracetest"
 	"go.opentelemetry.io/otel/trace"
@@ -88,6 +90,30 @@ func TestMiddlewareSkipsNilOption(t *testing.T) {
 	assert.Len(t, recorder.Ended(), 1)
 }
 
+func TestMiddlewareRecordsMetricsWithMeterProvider(t *testing.T) {
+	reader := sdkmetric.NewManualReader()
+	provider := sdkmetric.NewMeterProvider(sdkmetric.WithReader(reader))
+	handler := otel.Middleware(otel.WithMeterProvider(provider))(func(context.Context, any) error {
+		return nil
+	})
+
+	err := handler(context.Background(), &gitlab.PushEvent{
+		ObjectKind: "push",
+		EventName:  "push",
+	})
+	require.NoError(t, err)
+
+	var rm metricdata.ResourceMetrics
+	require.NoError(t, reader.Collect(t.Context(), &rm))
+	events := metricByName(t, rm, "gitlab.webhook.events")
+	eventSum, ok := events.Data.(metricdata.Sum[int64])
+	require.True(t, ok)
+	require.Len(t, eventSum.DataPoints, 1)
+	assert.Equal(t, int64(1), eventSum.DataPoints[0].Value)
+	assertMetricAttrString(t, eventSum.DataPoints[0].Attributes, "gitlab.webhook.event_type", "push")
+	assertMetricAttrString(t, eventSum.DataPoints[0].Attributes, "gitlab.webhook.result", "success")
+}
+
 func attrString(attrs []attribute.KeyValue, key string) string {
 	for _, attr := range attrs {
 		if string(attr.Key) == key {
@@ -106,4 +132,27 @@ func attrInt64(attrs []attribute.KeyValue, key string) int64 {
 	}
 
 	return 0
+}
+
+func metricByName(t *testing.T, rm metricdata.ResourceMetrics, name string) metricdata.Metrics {
+	t.Helper()
+
+	for _, scope := range rm.ScopeMetrics {
+		for _, metric := range scope.Metrics {
+			if metric.Name == name {
+				return metric
+			}
+		}
+	}
+
+	require.Failf(t, "metric not found", "metric %q was not collected", name)
+	return metricdata.Metrics{}
+}
+
+func assertMetricAttrString(t *testing.T, attrs attribute.Set, key, expected string) {
+	t.Helper()
+
+	value, ok := attrs.Value(attribute.Key(key))
+	require.Truef(t, ok, "attribute %q was not found", key)
+	assert.Equal(t, expected, value.AsString())
 }
