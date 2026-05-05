@@ -70,7 +70,8 @@ func TestDispatcher_Dispatch(t *testing.T) {
 			req.Header.Set("Content-Type", "application/json")
 			req.Header.Set("X-Gitlab-Event", string(tt.eventType))
 
-			err := dispatcher.DispatchRequest(req,
+			err := dispatcher.DispatchRequest(
+				req,
 				DispatchRequestWithContext(newDispatcherContext(req.Context())),
 			)
 
@@ -85,8 +86,10 @@ func TestDispatcher_DispatchRequestHTTPServerSmoke(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, http.MethodPost, r.Method)
 		assert.Equal(t, "/webhook", r.URL.Path)
-		assert.NoError(t,
-			dispatcher.DispatchRequest(r,
+		assert.NoError(
+			t,
+			dispatcher.DispatchRequest(
+				r,
 				DispatchRequestWithContext(newDispatcherContext(r.Context())),
 			),
 		)

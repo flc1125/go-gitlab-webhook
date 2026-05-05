@@ -35,7 +35,8 @@ func Middleware(opts ...Option) gitlabwebhook.Middleware {
 			metricRecorder.RecordActive(ctx, metadata, 1)
 			defer metricRecorder.RecordActive(ctx, metadata, -1)
 
-			ctx, span := tracer.Start(ctx,
+			ctx, span := tracer.Start(
+				ctx,
 				metadata.SpanName,
 				trace.WithAttributes(metadata.Attributes...),
 			)
