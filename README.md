@@ -4,7 +4,6 @@
 [![Package Version](https://badgen.net/github/release/flc1125/go-gitlab-webhook/stable)](https://github.com/flc1125/go-gitlab-webhook/releases)
 [![GoDoc](https://pkg.go.dev/badge/github.com/flc1125/go-gitlab-webhook/v3)](https://pkg.go.dev/github.com/flc1125/go-gitlab-webhook/v3)
 [![codecov](https://codecov.io/gh/flc1125/go-gitlab-webhook/graph/badge.svg?token=QPTHZ5L9GT)](https://codecov.io/gh/flc1125/go-gitlab-webhook)
-[![Go Report Card](https://goreportcard.com/badge/github.com/flc1125/go-gitlab-webhook)](https://goreportcard.com/report/github.com/flc1125/go-gitlab-webhook)
 [![CI](https://github.com/flc1125/go-gitlab-webhook/actions/workflows/ci.yml/badge.svg)](https://github.com/flc1125/go-gitlab-webhook/actions/workflows/ci.yml)
 [![tests](https://github.com/flc1125/go-gitlab-webhook/actions/workflows/test.yml/badge.svg)](https://github.com/flc1125/go-gitlab-webhook/actions/workflows/test.yml)
 [![MIT license](https://img.shields.io/badge/license-MIT-brightgreen.svg)](https://opensource.org/licenses/MIT)
