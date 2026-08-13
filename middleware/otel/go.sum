@@ -36,8 +36,8 @@ github.com/rogpeppe/go-internal v1.16.0 h1:O9DK+vNMDVGLr2BeZqmpLeMjiMNkuXfcqntWb
 github.com/rogpeppe/go-internal v1.16.0/go.mod h1:DrUVZyrJU+txYW5/1kwtXQSMFio52ZOxX7yM1VHvnxs=
 github.com/stretchr/testify v1.11.1 h1:7s2iGBzp5EwR7/aIZr8ao5+dra3wiQyKjjFuvgVKu7U=
 github.com/stretchr/testify v1.11.1/go.mod h1:wZwfW3scLgRK+23gO65QZefKpKQRnfz6sD981Nm4B6U=
-gitlab.com/gitlab-org/api/client-go/v2 v2.56.0 h1:2dWcjisjwmEXUZ841bzcJGoyEtCpVKXOAIMmbMPQ6YM=
-gitlab.com/gitlab-org/api/client-go/v2 v2.56.0/go.mod h1:gcqiTA4aFvyvPZspm+YwnMFObw2t8K3YCXxAwJgY51g=
+gitlab.com/gitlab-org/api/client-go/v2 v2.57.0 h1:tabr+vBHQ/hg3GUvn7kLd9c7RRazXX439bMYL2y6+5s=
+gitlab.com/gitlab-org/api/client-go/v2 v2.57.0/go.mod h1:gcqiTA4aFvyvPZspm+YwnMFObw2t8K3YCXxAwJgY51g=
 go.opentelemetry.io/auto/sdk v1.2.1 h1:jXsnJ4Lmnqd11kwkBV2LgLoFMZKizbCi5fNZ/ipaZ64=
 go.opentelemetry.io/auto/sdk v1.2.1/go.mod h1:KRTj+aOaElaLi+wW1kO/DZRXwkF4C5xPbEe3ZiIhN7Y=
 go.opentelemetry.io/otel v1.45.0 h1:pdrWmLHofpubmArBv1LgFSv1Z0Ie/ppdZzu+kUN5EeU=
