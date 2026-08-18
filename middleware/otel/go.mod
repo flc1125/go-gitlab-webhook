@@ -5,7 +5,7 @@ go 1.25.0
 require (
 	github.com/flc1125/go-gitlab-webhook/v3 v3.2.0
 	github.com/stretchr/testify v1.12.0
-	gitlab.com/gitlab-org/api/client-go/v2 v2.58.0
+	gitlab.com/gitlab-org/api/client-go/v2 v2.58.1
 	go.opentelemetry.io/otel v1.45.0
 	go.opentelemetry.io/otel/metric v1.45.0
 	go.opentelemetry.io/otel/sdk v1.45.0
