@@ -1,6 +1,6 @@
 module github.com/flc1125/go-gitlab-webhook/middleware/otel/v3
 
-go 1.25.0
+go 1.26.0
 
 require (
 	github.com/flc1125/go-gitlab-webhook/v3 v3.2.0

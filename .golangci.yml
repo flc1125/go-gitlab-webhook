@@ -51,7 +51,7 @@ linters:
       replace-allow-list:
         - github.com/flc1125/go-gitlab-webhook/v3
       toolchain-forbidden: true
-      go-version-pattern: '^1\.25\.0$'
+      go-version-pattern: '^1\.26\.0$'
     nolintlint:
       require-specific: true
     staticcheck:
