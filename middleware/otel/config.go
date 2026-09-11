@@ -9,6 +9,7 @@ import (
 type config struct {
 	tracerProvider trace.TracerProvider
 	meterProvider  metric.MeterProvider
+	headers        []string
 }
 
 // Option configures [Middleware].
@@ -45,6 +46,15 @@ func WithMeterProvider(provider metric.MeterProvider) Option {
 		if provider != nil {
 			c.meterProvider = provider
 		}
+	})
+}
+
+// WithHeaders configures the request headers recorded as span attributes.
+//
+// Header values are captured from each dispatched webhook request.
+func WithHeaders(headers ...string) Option {
+	return optionFunc(func(c *config) {
+		c.headers = append(c.headers, headers...)
 	})
 }
 
