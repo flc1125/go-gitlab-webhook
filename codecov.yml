@@ -2,8 +2,8 @@ codecov:
   require_ci_to_pass: true
 
 fixes:
-  - "github.com/flc1125/go-gitlab-webhook/v3/::"
-  - "github.com/flc1125/go-gitlab-webhook/middleware/otel/v3/::middleware/otel/"
+  - "github.com/flc1125/go-gitlab-webhook/v4/::"
+  - "github.com/flc1125/go-gitlab-webhook/middleware/otel/v4/::middleware/otel/"
 
 coverage:
   status:

@@ -6,9 +6,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/flc1125/go-gitlab-webhook/middleware/otel/v3/internal/eventmeta"
-	"github.com/flc1125/go-gitlab-webhook/middleware/otel/v3/internal/metrics"
-	"github.com/flc1125/go-gitlab-webhook/middleware/otel/v3/internal/semconv"
+	"github.com/flc1125/go-gitlab-webhook/middleware/otel/v4/internal/eventmeta"
+	"github.com/flc1125/go-gitlab-webhook/middleware/otel/v4/internal/metrics"
+	"github.com/flc1125/go-gitlab-webhook/middleware/otel/v4/internal/semconv"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/otel/attribute"

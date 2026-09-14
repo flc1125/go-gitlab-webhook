@@ -1,12 +1,14 @@
 # GitLab Webhook OpenTelemetry Middleware
 
-OpenTelemetry tracing and metrics middleware for `github.com/flc1125/go-gitlab-webhook/v3`.
+OpenTelemetry tracing and metrics middleware for `github.com/flc1125/go-gitlab-webhook/v4`.
 
 ## Installation
 
 ```shell
-go get github.com/flc1125/go-gitlab-webhook/middleware/otel/v3
+go get github.com/flc1125/go-gitlab-webhook/middleware/otel/v4
 ```
+
+When upgrading from v3, see the [migration guide](../../MIGRATION.md), including the updated OpenTelemetry instrumentation scope.
 
 ## Usage
 
@@ -17,9 +19,9 @@ import (
 	"context"
 	"net/http"
 
-	otelmiddleware "github.com/flc1125/go-gitlab-webhook/middleware/otel/v3"
-	gitlabwebhook "github.com/flc1125/go-gitlab-webhook/v3"
-	"gitlab.com/gitlab-org/api/client-go/v2"
+	otelmiddleware "github.com/flc1125/go-gitlab-webhook/middleware/otel/v4"
+	gitlabwebhook "github.com/flc1125/go-gitlab-webhook/v4"
+	"gitlab.com/gitlab-org/api/client-go/v3"
 )
 
 type pushListener struct{}

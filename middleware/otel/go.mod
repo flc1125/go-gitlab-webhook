@@ -1,11 +1,11 @@
-module github.com/flc1125/go-gitlab-webhook/middleware/otel/v3
+module github.com/flc1125/go-gitlab-webhook/middleware/otel/v4
 
 go 1.26.0
 
 require (
-	github.com/flc1125/go-gitlab-webhook/v3 v3.2.0
+	github.com/flc1125/go-gitlab-webhook/v4 v4.0.0
 	github.com/stretchr/testify v1.12.1
-	gitlab.com/gitlab-org/api/client-go/v2 v2.64.0
+	gitlab.com/gitlab-org/api/client-go/v3 v3.9.0
 	go.opentelemetry.io/otel v1.46.0
 	go.opentelemetry.io/otel/metric v1.46.0
 	go.opentelemetry.io/otel/sdk v1.46.0
@@ -28,4 +28,4 @@ require (
 	golang.org/x/time v0.16.0 // indirect
 )
 
-replace github.com/flc1125/go-gitlab-webhook/v3 => ../..
+replace github.com/flc1125/go-gitlab-webhook/v4 => ../..

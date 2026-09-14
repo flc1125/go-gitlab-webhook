@@ -1,0 +1,46 @@
+{
+  "object_kind": "merge_request",
+  "event_type": "merge_request",
+  "project": {
+    "id": 1,
+    "name": "Gitlab Test",
+    "path_with_namespace": "gitlab-org/gitlab-test"
+  },
+  "object_attributes": {
+    "id": 10,
+    "iid": 2,
+    "action": "update",
+    "state": "opened"
+  },
+  "reviewers": [
+    {
+      "id": 42,
+      "name": "Reviewer",
+      "username": "reviewer",
+      "state": "unreviewed",
+      "re_requested": true
+    }
+  ],
+  "changes": {
+    "reviewers": {
+      "previous": [
+        {
+          "id": 42,
+          "name": "Reviewer",
+          "username": "reviewer",
+          "state": "approved",
+          "re_requested": false
+        }
+      ],
+      "current": [
+        {
+          "id": 42,
+          "name": "Reviewer",
+          "username": "reviewer",
+          "state": "unreviewed",
+          "re_requested": true
+        }
+      ]
+    }
+  }
+}

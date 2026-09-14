@@ -1,4 +1,4 @@
-module github.com/flc1125/go-gitlab-webhook/internal/tools/v3
+module github.com/flc1125/go-gitlab-webhook/internal/tools/v4
 
 go 1.26.0
 

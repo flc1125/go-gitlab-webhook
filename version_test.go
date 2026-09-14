@@ -4,7 +4,7 @@ import (
 	"regexp"
 	"testing"
 
-	gitlabwebhook "github.com/flc1125/go-gitlab-webhook/v3"
+	gitlabwebhook "github.com/flc1125/go-gitlab-webhook/v4"
 	"github.com/stretchr/testify/assert"
 )
 

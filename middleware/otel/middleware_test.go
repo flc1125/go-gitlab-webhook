@@ -5,10 +5,10 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/flc1125/go-gitlab-webhook/middleware/otel/v3"
+	"github.com/flc1125/go-gitlab-webhook/middleware/otel/v4"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	gitlab "gitlab.com/gitlab-org/api/client-go/v2"
+	gitlab "gitlab.com/gitlab-org/api/client-go/v3"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
 	sdkmetric "go.opentelemetry.io/otel/sdk/metric"
@@ -50,6 +50,8 @@ func TestMiddlewareCreatesSpan(t *testing.T) {
 	require.Len(t, spans, 1)
 
 	span := tracetest.SpanStubFromReadOnlySpan(spans[0])
+	assert.Equal(t, "github.com/flc1125/go-gitlab-webhook/middleware/otel/v4", span.InstrumentationScope.Name)
+	assert.Equal(t, otel.Version(), span.InstrumentationScope.Version)
 	assert.Equal(t, "gitlab.webhook.push", span.Name)
 	assert.Equal(t, "push", attrString(span.Attributes, "gitlab.webhook.event_type"))
 	assert.Equal(t, "group/project", attrString(span.Attributes, "gitlab.project.path"))
@@ -105,6 +107,9 @@ func TestMiddlewareRecordsMetricsWithMeterProvider(t *testing.T) {
 
 	var rm metricdata.ResourceMetrics
 	require.NoError(t, reader.Collect(t.Context(), &rm))
+	require.Len(t, rm.ScopeMetrics, 1)
+	assert.Equal(t, "github.com/flc1125/go-gitlab-webhook/middleware/otel/v4", rm.ScopeMetrics[0].Scope.Name)
+	assert.Equal(t, otel.Version(), rm.ScopeMetrics[0].Scope.Version)
 	events := metricByName(t, rm, "gitlab.webhook.events")
 	eventSum, ok := events.Data.(metricdata.Sum[int64])
 	require.True(t, ok)

@@ -165,7 +165,7 @@ clean:
 	@rm -rf coverage.txt coverage.out coverage.html
 
 .PHONY: push-tags
-# git tag -l | grep 'v3.0.0-rc.3$' | xargs -P 4 -I {} git push origin {}
+# git tag -l | grep 'v4.0.0$' | xargs -P 4 -I {} git push origin {}
 push-tags:
 	@[ "${TAG}" ] || ( echo ">> env var TAG is not set"; exit 1 )
 	@echo "Pushing tag ${TAG} to origin" \

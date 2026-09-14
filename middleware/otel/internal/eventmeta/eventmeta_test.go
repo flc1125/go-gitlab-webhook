@@ -3,9 +3,9 @@ package eventmeta_test
 import (
 	"testing"
 
-	"github.com/flc1125/go-gitlab-webhook/middleware/otel/v3/internal/eventmeta"
+	"github.com/flc1125/go-gitlab-webhook/middleware/otel/v4/internal/eventmeta"
 	"github.com/stretchr/testify/assert"
-	gitlab "gitlab.com/gitlab-org/api/client-go/v2"
+	gitlab "gitlab.com/gitlab-org/api/client-go/v3"
 	"go.opentelemetry.io/otel/attribute"
 )
 
@@ -610,7 +610,7 @@ func TestExtractUnknownPointerEvent(t *testing.T) {
 
 	assert.Equal(t, "gitlab.webhook.unknown", metadata.SpanName)
 	assert.Equal(t, "unknown", attrString(metadata.Attributes, "gitlab.webhook.event_type"))
-	assert.Equal(t, "github.com/flc1125/go-gitlab-webhook/middleware/otel/v3/internal/eventmeta_test.unknownEvent", attrString(metadata.Attributes, "gitlab.webhook.go_type"))
+	assert.Equal(t, "github.com/flc1125/go-gitlab-webhook/middleware/otel/v4/internal/eventmeta_test.unknownEvent", attrString(metadata.Attributes, "gitlab.webhook.go_type"))
 }
 
 func TestExtractNilEvent(t *testing.T) {
