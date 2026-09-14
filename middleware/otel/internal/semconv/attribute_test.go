@@ -3,7 +3,7 @@ package semconv_test
 import (
 	"testing"
 
-	"github.com/flc1125/go-gitlab-webhook/middleware/otel/v3/internal/semconv"
+	"github.com/flc1125/go-gitlab-webhook/middleware/otel/v4/internal/semconv"
 	"github.com/stretchr/testify/assert"
 	"go.opentelemetry.io/otel/attribute"
 )

@@ -4,15 +4,15 @@ import (
 	"context"
 	"time"
 
-	"github.com/flc1125/go-gitlab-webhook/middleware/otel/v3/internal/eventmeta"
-	"github.com/flc1125/go-gitlab-webhook/middleware/otel/v3/internal/metrics"
-	gitlabwebhook "github.com/flc1125/go-gitlab-webhook/v3"
+	"github.com/flc1125/go-gitlab-webhook/middleware/otel/v4/internal/eventmeta"
+	"github.com/flc1125/go-gitlab-webhook/middleware/otel/v4/internal/metrics"
+	gitlabwebhook "github.com/flc1125/go-gitlab-webhook/v4"
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/trace"
 )
 
 const (
-	instrumentationName = "github.com/flc1125/go-gitlab-webhook/middleware/otel/v3"
+	instrumentationName = "github.com/flc1125/go-gitlab-webhook/middleware/otel/v4"
 )
 
 // Middleware returns a [gitlabwebhook.Middleware] that traces and records

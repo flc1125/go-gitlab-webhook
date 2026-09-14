@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	"github.com/flc1125/go-gitlab-webhook/middleware/otel/v3/internal/eventmeta"
-	"github.com/flc1125/go-gitlab-webhook/middleware/otel/v3/internal/semconv"
+	"github.com/flc1125/go-gitlab-webhook/middleware/otel/v4/internal/eventmeta"
+	"github.com/flc1125/go-gitlab-webhook/middleware/otel/v4/internal/semconv"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/metric"
 	"go.opentelemetry.io/otel/metric/noop"

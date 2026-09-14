@@ -1,11 +1,11 @@
 module-sets:
   stable:
-    version: v3.2.0
+    version: v4.0.0
     modules:
       # Core modules
-      - github.com/flc1125/go-gitlab-webhook/v3
+      - github.com/flc1125/go-gitlab-webhook/v4
 
       # Middleware modules
-      - github.com/flc1125/go-gitlab-webhook/middleware/otel/v3
+      - github.com/flc1125/go-gitlab-webhook/middleware/otel/v4
 excluded-modules:
-  - github.com/flc1125/go-gitlab-webhook/internal/tools/v3
+  - github.com/flc1125/go-gitlab-webhook/internal/tools/v4

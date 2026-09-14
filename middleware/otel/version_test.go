@@ -4,7 +4,7 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/flc1125/go-gitlab-webhook/middleware/otel/v3"
+	"github.com/flc1125/go-gitlab-webhook/middleware/otel/v4"
 	"github.com/stretchr/testify/assert"
 )
 

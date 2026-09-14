@@ -3,7 +3,7 @@ package gitlabwebhook
 import (
 	"context"
 
-	gitlab "gitlab.com/gitlab-org/api/client-go/v2"
+	gitlab "gitlab.com/gitlab-org/api/client-go/v3"
 )
 
 // BuildListener handles GitLab build webhook events.

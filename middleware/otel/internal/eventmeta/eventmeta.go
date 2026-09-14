@@ -4,8 +4,8 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/flc1125/go-gitlab-webhook/middleware/otel/v3/internal/semconv"
-	gitlab "gitlab.com/gitlab-org/api/client-go/v2"
+	"github.com/flc1125/go-gitlab-webhook/middleware/otel/v4/internal/semconv"
+	gitlab "gitlab.com/gitlab-org/api/client-go/v3"
 	"go.opentelemetry.io/otel/attribute"
 )
 
