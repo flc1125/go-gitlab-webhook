@@ -11,6 +11,10 @@ make lint
 make test
 ```
 
+## Releasing
+
+For version assessment, release preparation, module tagging, and GitHub Releases from `4.x`, see the [release guide](RELEASING.md).
+
 ## Adding Support for a New Event
 
 If the upstream GitLab Go client already supports parsing a webhook event, but this repository's dispatcher does not yet route it, follow the steps below to add support.
