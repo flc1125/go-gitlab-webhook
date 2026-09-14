@@ -4,6 +4,8 @@ Thank you for contributing to this project.
 
 ## Development
 
+Base new work on `4.x` and target pull requests at `4.x`. This version line uses GitLab Go Client v3 and the `/v4` module paths.
+
 Before submitting changes, run:
 
 ```bash

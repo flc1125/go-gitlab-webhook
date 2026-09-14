@@ -3,9 +3,9 @@
 ![Supported Go Versions](https://img.shields.io/badge/Go-%3E%3D1.26.0-blue)
 [![Package Version](https://badgen.net/github/release/flc1125/go-gitlab-webhook/stable)](https://github.com/flc1125/go-gitlab-webhook/releases)
 [![GoDoc](https://pkg.go.dev/badge/github.com/flc1125/go-gitlab-webhook/v4)](https://pkg.go.dev/github.com/flc1125/go-gitlab-webhook/v4)
-[![codecov](https://codecov.io/gh/flc1125/go-gitlab-webhook/graph/badge.svg?token=QPTHZ5L9GT)](https://codecov.io/gh/flc1125/go-gitlab-webhook)
-[![CI](https://github.com/flc1125/go-gitlab-webhook/actions/workflows/ci.yml/badge.svg)](https://github.com/flc1125/go-gitlab-webhook/actions/workflows/ci.yml)
-[![tests](https://github.com/flc1125/go-gitlab-webhook/actions/workflows/test.yml/badge.svg)](https://github.com/flc1125/go-gitlab-webhook/actions/workflows/test.yml)
+[![codecov](https://codecov.io/gh/flc1125/go-gitlab-webhook/branch/4.x/graph/badge.svg?token=QPTHZ5L9GT)](https://codecov.io/gh/flc1125/go-gitlab-webhook/tree/4.x)
+[![CI](https://github.com/flc1125/go-gitlab-webhook/actions/workflows/ci.yml/badge.svg?branch=4.x)](https://github.com/flc1125/go-gitlab-webhook/actions/workflows/ci.yml?query=branch%3A4.x)
+[![tests](https://github.com/flc1125/go-gitlab-webhook/actions/workflows/test.yml/badge.svg?branch=4.x)](https://github.com/flc1125/go-gitlab-webhook/actions/workflows/test.yml?query=branch%3A4.x)
 [![MIT license](https://img.shields.io/badge/license-MIT-brightgreen.svg)](https://opensource.org/licenses/MIT)
 
 This is a simple webhook dispatcher for Gitlab. It listens for incoming webhooks and dispatches them to the appropriate handler.
