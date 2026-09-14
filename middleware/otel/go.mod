@@ -3,7 +3,7 @@ module github.com/flc1125/go-gitlab-webhook/middleware/otel/v3
 go 1.26.0
 
 require (
-	github.com/flc1125/go-gitlab-webhook/v3 v3.2.0
+	github.com/flc1125/go-gitlab-webhook/v3 v3.3.0
 	github.com/stretchr/testify v1.12.1
 	gitlab.com/gitlab-org/api/client-go/v2 v2.64.0
 	go.opentelemetry.io/otel v1.46.0
